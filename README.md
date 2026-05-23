@@ -52,9 +52,7 @@ A minimal landing page used for the Product Hunt launch and early interest colle
 
 ## Try It
 
-**[Live Demo]()**
-**[Landing Page]()**
-**[Product Hunt Page]()**
+**[Live Demo]()** | **[Landing Page]()** | **[Product Hunt Page]()**
 
 ---
 
