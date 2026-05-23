@@ -35,10 +35,12 @@ This approach shifts the emotional framing from *punishment for missing* to *car
 
 ```
 /
-├── index.html          # Interactive UI/UX concept demo
+├── index.html          
 ├── /docs
 │   ├── index.html      # Landing page
 │   └── demo.gif        # Demo recording (coming soon)
+│   └── /demo
+│   │  └── index.html   # Interactive UI/UX concept demo
 └── README.md
 ```
 
