@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Habit Garden — A habit tracker where your routines grow as living plants. Tend your garden daily and watch it flourish.">
+    <title>Habit Garden — Grow Better Habits</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #06110d;
+            --surface: #0b1b13;
+            --surface-2: #0f2218;
+            --sage: #5b9e79;
+            --sage-dim: #3d6e52;
+            --gold: #c8a86c;
+            --gold-light: #dfc08a;
+            --cream: #eee6d4;
+            --cream-dim: #b5a48c;
+            --cream-muted: #68604f;
+            --border: rgba(175, 148, 92, 0.13);
+            --border-mid: rgba(175, 148, 92, 0.26);
+            --border-strong: rgba(175, 148, 92, 0.44);
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            min-height: 100svh;
+            background-color: var(--bg);
+            color: var(--cream);
+            font-family: 'DM Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .bg-atmosphere {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 70% 65% at 78% 50%, rgba(18, 64, 38, 0.30) 0%, transparent 65%),
+                radial-gradient(ellipse 42% 50% at 10% 85%, rgba(10, 42, 22, 0.38) 0%, transparent 55%),
+                radial-gradient(ellipse 32% 38% at 5% 12%, rgba(14, 50, 28, 0.22) 0%, transparent 50%);
+        }
+
+        .bg-grain {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.32;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
+        }
+
+        .hero {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100svh;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 64px 80px;
+            gap: 72px;
+        }
+
+        .left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 10.5px;
+            font-weight: 500;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            color: var(--sage);
+            border: 1px solid rgba(91, 158, 121, 0.3);
+            border-radius: 999px;
+            padding: 5px 13px 5px 10px;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeUp 0.55s ease forwards 0.10s;
+        }
+
+        .badge-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--sage);
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-weight: 500;
+            font-size: clamp(54px, 5.4vw, 82px);
+            line-height: 1.03;
+            letter-spacing: -0.025em;
+            color: var(--cream);
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeUp 0.65s ease forwards 0.20s;
+        }
+
+        h1 em {
+            font-style: italic;
+            color: var(--gold);
+        }
+
+        .subheadline {
+            font-size: clamp(14.5px, 1.3vw, 16px);
+            font-weight: 300;
+            line-height: 1.72;
+            color: var(--cream-dim);
+            max-width: 390px;
+            margin-bottom: 42px;
+            opacity: 0;
+            animation: fadeUp 0.65s ease forwards 0.30s;
+        }
+
+        .buttons {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 52px;
+            opacity: 0;
+            animation: fadeUp 0.65s ease forwards 0.40s;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13.5px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            border-radius: 9px;
+            padding: 12px 22px;
+            transition: transform 0.17s ease, box-shadow 0.17s ease, background 0.17s ease, border-color 0.17s ease;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.975) !important;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: #0b0e07;
+            border: 1px solid var(--gold);
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-light);
+            border-color: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(200, 168, 108, 0.22);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--cream);
+            border: 1px solid var(--border-mid);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-strong);
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            color: var(--cream-muted);
+            transition: color 0.18s ease;
+            opacity: 0;
+            animation: fadeUp 0.65s ease forwards 0.52s;
+        }
+
+        .github-link:hover {
+            color: var(--cream-dim);
+        }
+
+        .github-link svg {
+            opacity: 0.6;
+            transition: opacity 0.18s ease;
+            flex-shrink: 0;
+        }
+
+        .github-link:hover svg {
+            opacity: 1;
+        }
+
+        .right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 0.28s;
+        }
+
+        .gif-frame {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 9 / 17;
+            max-height: calc(100svh - 128px);
+            border-radius: 30px;
+            overflow: hidden;
+            border: 1px solid var(--border-mid);
+            background: var(--surface);
+            box-shadow:
+                0 0 0 1px rgba(91, 158, 121, 0.05),
+                0 40px 100px rgba(0, 0, 0, 0.60),
+                inset 0 0 70px rgba(18, 60, 35, 0.14);
+        }
+
+        .gif-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                    transparent 8%,
+                    rgba(200, 168, 108, 0.38) 38%,
+                    rgba(200, 168, 108, 0.38) 62%,
+                    transparent 92%);
+            z-index: 4;
+        }
+
+        .gif-frame::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: linear-gradient(to top, rgba(6, 17, 13, 0.45), transparent);
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .gif-frame img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            display: block;
+        }
+
+        .gif-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            z-index: 2;
+        }
+
+        .placeholder-icon {
+            width: 58px;
+            height: 58px;
+            animation: breathe 4.5s ease-in-out infinite;
+        }
+
+        .placeholder-label {
+            font-size: 10.5px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--cream-muted);
+        }
+
+        .ornament {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            z-index: 5;
+            opacity: 0.28;
+        }
+
+        .ornament-tl {
+            top: 15px;
+            left: 15px;
+        }
+
+        .ornament-tr {
+            top: 15px;
+            right: 15px;
+            transform: rotate(90deg);
+        }
+
+        .ornament-bl {
+            bottom: 15px;
+            left: 15px;
+            transform: rotate(270deg);
+        }
+
+        .ornament-br {
+            bottom: 15px;
+            right: 15px;
+            transform: rotate(180deg);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                opacity: 0.75;
+                transform: translateY(-6px) scale(1.06);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .hero {
+                gap: 44px;
+                padding: 52px 48px;
+            }
+
+            .gif-frame {
+                max-width: 340px;
+                border-radius: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 52px 28px 64px;
+                gap: 40px;
+                min-height: auto;
+            }
+
+            h1 {
+                font-size: clamp(50px, 13vw, 68px);
+            }
+
+            .subheadline {
+                max-width: 100%;
+            }
+
+            .right {
+                order: -1;
+            }
+
+            .gif-frame {
+                max-width: 260px;
+                aspect-ratio: 9 / 17;
+                max-height: 62svh;
+                border-radius: 18px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .hero {
+                padding: 40px 20px 56px;
+            }
+
+            .buttons {
+                flex-direction: column;
+                align-items: stretch;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-atmosphere" aria-hidden="true"></div>
+    <div class="bg-grain" aria-hidden="true"></div>
+
+    <main class="hero">
+
+        <div class="left">
+
+            <span class="badge">
+                <span class="badge-dot"></span>
+                UI / UX Concept
+            </span>
+
+            <h1>Grow <em>better</em><br>habits.</h1>
+
+            <p class="subheadline">
+                Habit Garden turns your daily routines into a living garden.
+                Tend it every day and it blossoms. Neglect it and it wilts.
+                No streaks. No grids. Just something worth taking care&nbsp;of.
+            </p>
+
+            <div class="buttons">
+                <a href="https://forms.gle/eg2B8UfdrnsjPoYN9" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <path d="M7 12V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                        <path d="M7 9C7 9 4.5 7.5 4 4.5C4 4.5 6.5 3.5 8.5 6" stroke="currentColor" stroke-width="1.15"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M7 7C7 7 9 5 9.5 2.5C9.5 2.5 7 2 5.5 4.5" stroke="currentColor" stroke-width="1.15"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Join the waitlist
+                </a>
+
+                <a href="../index.html" class="btn btn-secondary">
+                    Try the demo
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                        <path d="M2 6.5H11M11 6.5L7.5 3M11 6.5L7.5 10" stroke="currentColor" stroke-width="1.2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </a>
+            </div>
+
+            <a href="https://github.com/dormannilya/habit-garden-concept" target="_blank" rel="noopener noreferrer"
+                class="github-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path
+                        d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                </svg>
+                View on GitHub
+            </a>
+
+        </div>
+
+        <div class="right">
+            <div class="gif-frame">
+
+                <!--
+          GIF PLACEHOLDER
+          ─────────────────────────────────────────────────────────
+          Replace src="./demo.gif" with your recorded demo GIF.
+          Recommended: 480×854 px (9:16 portrait), ≤ 5 MB.
+          The placeholder below auto-hides once the GIF loads.
+          ─────────────────────────────────────────────────────────
+        -->
+                <img src="./demo.gif" alt="Habit Garden interactive demo — plants growing as habits are tracked"
+                    onload="document.getElementById('gif-ph').style.display='none'"
+                    onerror="this.style.display='none'" />
+
+                <div class="gif-placeholder" id="gif-ph">
+                    <svg class="placeholder-icon" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="29" y1="46" x2="29" y2="24" stroke="#5b9e79" stroke-width="2"
+                            stroke-linecap="round" />
+                        <path d="M29 33C29 33 20 29 18 21C18 21 26 19 30.5 25.5" stroke="#5b9e79" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                        <path d="M29 27C29 27 35.5 21 37 13.5C37 13.5 30 12.5 27 18.5" stroke="#7ec49a"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                        <path d="M21 46C21 46 23 43 29 43C35 43 37 46 37 46H21Z" stroke="#3d6e52" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                    </svg>
+                    <p class="placeholder-label">Demo coming soon</p>
+                </div>
+
+                <svg class="ornament ornament-tl" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <path d="M2 12V3C2 2.448 2.448 2 3 2H12" stroke="#c8a86c" stroke-width="1.3"
+                        stroke-linecap="round" />
+                </svg>
+                <svg class="ornament ornament-tr" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <path d="M2 12V3C2 2.448 2.448 2 3 2H12" stroke="#c8a86c" stroke-width="1.3"
+                        stroke-linecap="round" />
+                </svg>
+                <svg class="ornament ornament-bl" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <path d="M2 12V3C2 2.448 2.448 2 3 2H12" stroke="#c8a86c" stroke-width="1.3"
+                        stroke-linecap="round" />
+                </svg>
+                <svg class="ornament ornament-br" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                    <path d="M2 12V3C2 2.448 2.448 2 3 2H12" stroke="#c8a86c" stroke-width="1.3"
+                        stroke-linecap="round" />
+                </svg>
+
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+</html>
