@@ -54,7 +54,7 @@ A minimal landing page used for the Product Hunt launch and early interest colle
 
 ## Try It
 
-**[Live Demo]()** | **[Landing Page](https://dormannilya.github.io/habit-garden-concept/)** | **[Product Hunt Page]()** | **[Join the waitlist](https://forms.gle/eg2B8UfdrnsjPoYN9)**
+**[Live Demo](https://dormannilya.github.io/habit-garden-concept/demo/)** | **[Landing Page](https://dormannilya.github.io/habit-garden-concept/)** | **[Product Hunt Page]()** | **[Join the waitlist](https://forms.gle/eg2B8UfdrnsjPoYN9)**
 
 ---
 
