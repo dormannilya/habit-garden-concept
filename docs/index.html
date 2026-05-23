@@ -497,18 +497,12 @@
 
         <div class="right">
             <div class="gif-frame">
-
-                <!--
-          GIF PLACEHOLDER
-          ─────────────────────────────────────────────────────────
-          Replace src="./demo.gif" with your recorded demo GIF.
-          Recommended: 480×854 px (9:16 portrait), ≤ 5 MB.
-          The placeholder below auto-hides once the GIF loads.
-          ─────────────────────────────────────────────────────────
-        -->
-                <img src="./demo.gif" alt="Habit Garden interactive demo — plants growing as habits are tracked"
-                    onload="document.getElementById('gif-ph').style.display='none'"
-                    onerror="this.style.display='none'" />
+                <video
+                  autoplay loop muted playsinline
+                  oncanplay="document.getElementById('gif-ph').style.display='none'"
+                  style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;display:block;">
+                  <source src="./demo/habit_garden_demo.webm" type="video/webm">
+                </video>
 
                 <div class="gif-placeholder" id="gif-ph">
                     <svg class="placeholder-icon" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
