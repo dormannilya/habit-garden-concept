@@ -11,7 +11,7 @@ A habit tracker reimagined as a living digital garden. Each habit is a plant: te
 
 ---
 
-## ✦ Concept
+## Concept
 
 Most habit trackers are built around data — streaks, percentages, heatmaps. Habit Garden is built around feeling. The core idea is simple: **your habits should feel alive**.
 
@@ -21,7 +21,7 @@ This approach shifts the emotional framing from *punishment for missing* to *car
 
 ---
 
-## ✦ Key Design Decisions
+## Key Design Decisions
 
 - **Plant lifecycle as progress metaphor** — habits move through visual states: seed → sprout → growing → blooming → thriving. Each state is earned, not assigned.
 - **Wilting instead of resetting** — skipping a habit degrades the plant gradually, not instantly. This mirrors how habits actually work in real life.
@@ -31,7 +31,7 @@ This approach shifts the emotional framing from *punishment for missing* to *car
 
 ---
 
-## ✦ What's in This Repo
+## What's in This Repo
 
 ```
 /
@@ -46,36 +46,34 @@ This approach shifts the emotional framing from *punishment for missing* to *car
 The full interactive prototype. Explore the plant growth states, habit interactions, and garden layout. Built with vanilla HTML, CSS, and JavaScript — no dependencies, no build step.
 
 ### `/docs/index.html` — Landing Page
-A minimal landing page used for the ProductHunt launch and early interest collection. Links to the concept demo and an early access form.
+A minimal landing page used for the Product Hunt launch and early interest collection. Links to the concept demo and an early access form.
 
 ---
 
-## ✦ Try It
+## Try It
 
-**→ [Live Demo](https://your-username.github.io/habit-garden/)**
-**→ [Landing Page](https://your-username.github.io/habit-garden/docs/)**
-
-> Replace the URLs above with your actual GitHub Pages URLs after enabling Pages from `/docs` on `main`.
+**[Live Demo]()**
+**[Landing Page]()**
+**[Product Hunt Page]()**
 
 ---
 
-## ✦ Status
+## Status
 
 This is an **early-stage UI/UX concept** created to test the core interaction model and visual language before committing to a full build.
 
 - [x] Core concept & visual design
 - [x] Interactive demo (plant states, habit interactions)
-- [x] Landing page
-- [ ] Demo GIF
-- [ ] ProductHunt launch
+- [ ] Product Hunt launch
 - [ ] Backend & data persistence
 - [ ] Mobile-native version
 
-Interested in where this is going? **[Join the early access list →](https://your-google-form-url)**
+Interested in where this is going? **[Join the early access list →]()**
+We are testing user interest **[Support the project on Product Hunt →]()**
 
 ---
 
-## ✦ Tech
+## Tech
 
 The demo is intentionally dependency-free:
 
@@ -85,7 +83,7 @@ The demo is intentionally dependency-free:
 
 ---
 
-## ✦ License
+## License
 
 License to be determined. All rights reserved until further notice.
 
