@@ -1,0 +1,2030 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <script>
+    (function () {
+      const RO = window.ResizeObserver;
+      if (RO) {
+        window.ResizeObserver = class extends RO {
+          constructor(cb) {
+            super((entries, obs) => {
+              window.requestAnimationFrame(() => {
+                try { cb(entries, obs); } catch (e) { }
+              });
+            });
+          }
+        };
+      }
+      window.addEventListener('error', function (e) {
+        if (e && e.message && e.message.indexOf('ResizeObserver') !== -1) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return false;
+        }
+      }, true);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <title>Habit Garden</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: #1a1814;
+      font-family: 'Manrope', -apple-system, system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      box-sizing: border-box;
+      background: radial-gradient(ellipse 60% 50% at 50% 30%, #2a2a22 0%, #16140f 70%);
+    }
+
+    @keyframes firefly {
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0.6);
+      }
+
+      40% {
+        opacity: 0.95;
+        transform: translate(8px, -6px) scale(1);
+      }
+
+      70% {
+        opacity: 0.7;
+        transform: translate(-4px, -2px) scale(0.9);
+      }
+    }
+
+    @keyframes drop {
+      0% {
+        transform: translateY(0) scaleY(0.6);
+        opacity: 0;
+      }
+
+      30% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(30px) scaleY(1.2);
+        opacity: 0;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes sheetUp {
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes tabIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.985);
+        filter: blur(2px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    @keyframes leafDrift {
+      0% {
+        transform: translate(-20px, -20px) rotate(0);
+        opacity: 0;
+      }
+
+      20% {
+        opacity: 0.6;
+      }
+
+      80% {
+        opacity: 0.6;
+      }
+
+      100% {
+        transform: translate(420px, 880px) rotate(540deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+    integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+    integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+    integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
+    crossorigin="anonymous"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useMemo } = React;
+
+    function IOSStatusBar() {
+      return (
+        <div style={{
+          display: 'flex', gap: 154, alignItems: 'center', justifyContent: 'center',
+          padding: '21px 24px 19px', boxSizing: 'border-box',
+          position: 'relative', zIndex: 20, width: '100%',
+        }}>
+          <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{
+              fontFamily: '-apple-system, "SF Pro", system-ui', fontWeight: 590,
+              fontSize: 17, lineHeight: '22px', color: '#fff',
+            }}>9:41</span>
+          </div>
+          <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+            <svg width="19" height="12" viewBox="0 0 19 12">
+              <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill="#fff" />
+              <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill="#fff" />
+              <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill="#fff" />
+              <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill="#fff" />
+            </svg>
+            <svg width="17" height="12" viewBox="0 0 17 12">
+              <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill="#fff" />
+              <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill="#fff" />
+              <circle cx="8.5" cy="10.5" r="1.5" fill="#fff" />
+            </svg>
+            <svg width="27" height="13" viewBox="0 0 27 13">
+              <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke="#fff" strokeOpacity="0.35" fill="none" />
+              <rect x="2" y="2" width="20" height="9" rx="2" fill="#fff" />
+              <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill="#fff" fillOpacity="0.4" />
+            </svg>
+          </div>
+        </div>
+      );
+    }
+
+    function IOSDevice({ children, width = 402, height = 874 }) {
+      return (
+        <div style={{
+          width, height, borderRadius: 48, overflow: 'hidden',
+          position: 'relative', background: '#000',
+          boxShadow: '0 40px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.4)',
+          fontFamily: '-apple-system, system-ui, sans-serif',
+          WebkitFontSmoothing: 'antialiased',
+        }}>
+          <div style={{
+            position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+            width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50,
+          }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+            <IOSStatusBar />
+          </div>
+          <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>{children}</div>
+          </div>
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
+            height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+            paddingBottom: 8, pointerEvents: 'none',
+          }}>
+            <div style={{ width: 139, height: 5, borderRadius: 100, background: 'rgba(255,255,255,0.7)' }} />
+          </div>
+        </div>
+      );
+    }
+
+    const P = {
+      bgTop: '#0a1612', bgMid: '#0e1d18', bgBot: '#16201a',
+      moon: '#f0d9a8', amber: '#d4a25e', amberWarm: '#e8b87a',
+      cream: '#f0e8d5', creamMuted: '#bdb5a3', muted: '#8a9389',
+      leaf: '#7eb586', leafBright: '#a8d39e', leafDeep: '#3d6647',
+      soil: '#2a1f15', soilLight: '#3d2d1f',
+      hillFar: '#152822', hillMid: '#172f24', hillNear: '#1b3a2a',
+    };
+
+    const PLANT_COLORS = {
+      leafLight: '#a8d39e', leaf: '#7eb586', leafDeep: '#4a7d5a', leafShadow: '#2d4f38',
+      stem: '#6a9568', stemDark: '#3d5e3f',
+      bloom: '#e8b87a', bloomDeep: '#d49457', bloomPink: '#e8a5a0',
+      wilt: '#8a7a4a', wiltDeep: '#5e5230',
+      pot: '#2a1f15', potRim: '#3d2d1f', soil: '#1a120a',
+    };
+
+    function SoilPatch({ cx, cy, w = 66 }) {
+      const c = PLANT_COLORS;
+      const rx = w / 2;
+      const ry = Math.max(4.5, rx * 0.22);
+      return (
+        <g>
+          <ellipse cx={cx} cy={cy + ry * 0.55} rx={rx * 0.95} ry={ry * 0.6} fill="#070504" opacity="0.45" />
+          <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={c.soil} />
+          <ellipse cx={cx} cy={cy - ry * 0.32} rx={rx * 0.88} ry={ry * 0.56} fill={c.potRim} />
+          <ellipse cx={cx - rx * 0.42} cy={cy - ry * 0.18} rx={Math.min(3.0, rx * 0.075)} ry={0.9} fill={c.soil} opacity="0.55" />
+          <ellipse cx={cx + rx * 0.46} cy={cy + ry * 0.05} rx={Math.min(2.2, rx * 0.06)} ry={0.7} fill={c.soil} opacity="0.45" />
+        </g>
+      );
+    }
+
+    function Plant({ species = 'leafy', stage = 2, wilted = false, size = 120 }) {
+      const c = { ...PLANT_COLORS };
+      if (wilted) {
+        c.leafLight = c.wilt; c.leaf = c.wilt; c.leafDeep = c.wiltDeep; c.leafShadow = c.wiltDeep;
+        c.stem = c.wiltDeep; c.stemDark = c.wiltDeep;
+        c.bloom = c.wilt; c.bloomDeep = c.wiltDeep; c.bloomPink = c.wilt;
+      }
+      const W = 120, H = 140, GY = 130;
+
+      const renderLotus = () => {
+        if (stage === 0) return <ellipse cx={W / 2} cy={GY - 4} rx={5} ry={3} fill={c.bloomDeep} />;
+        if (stage === 1) return (
+          <g transform={wilted ? `translate(0,4) rotate(-12 ${W / 2} ${GY})` : ''}>
+            <path d={`M${W / 2} ${GY} Q ${W / 2 - 2} ${GY - 15}, ${W / 2 + 1} ${GY - 22}`} stroke={c.stem} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+            <ellipse cx={W / 2 - 5} cy={GY - 20} rx={6} ry={3} fill={c.leaf} transform={`rotate(-30 ${W / 2 - 5} ${GY - 20})`} />
+            <ellipse cx={W / 2 + 6} cy={GY - 18} rx={6} ry={3} fill={c.leafLight} transform={`rotate(30 ${W / 2 + 6} ${GY - 18})`} />
+          </g>
+        );
+        const top = stage === 4 ? GY - 78 : stage === 3 ? GY - 65 : GY - 45;
+        return (
+          <g transform={wilted ? `rotate(-15 ${W / 2} ${GY})` : ''}>
+            <path d={`M${W / 2} ${GY} Q ${W / 2 - 4} ${GY - 30}, ${W / 2 + 2} ${top}`} stroke={c.stem} strokeWidth="3" fill="none" strokeLinecap="round" />
+            <ellipse cx={W / 2 - 14} cy={GY - 20} rx={11} ry={5} fill={c.leafDeep} transform={`rotate(-30 ${W / 2 - 14} ${GY - 20})`} />
+            <ellipse cx={W / 2 + 14} cy={GY - 28} rx={11} ry={5} fill={c.leaf} transform={`rotate(30 ${W / 2 + 14} ${GY - 28})`} />
+            {stage >= 3 && (
+              <React.Fragment>
+                <ellipse cx={W / 2 - 13} cy={GY - 45} rx={10} ry={4.5} fill={c.leaf} transform={`rotate(-35 ${W / 2 - 13} ${GY - 45})`} />
+                <ellipse cx={W / 2 + 13} cy={GY - 55} rx={10} ry={4.5} fill={c.leafLight} transform={`rotate(35 ${W / 2 + 13} ${GY - 55})`} />
+              </React.Fragment>
+            )}
+            {stage === 4 && (
+              <g transform={`translate(${W / 2 + 2}, ${top - 4})`}>
+                <ellipse cx="-7" cy="0" rx="6" ry="3" fill={c.bloomPink} transform="rotate(-30)" />
+                <ellipse cx="7" cy="0" rx="6" ry="3" fill={c.bloomPink} transform="rotate(30)" />
+                <ellipse cx="0" cy="-6" rx="5" ry="3" fill={c.bloom} />
+                <ellipse cx="0" cy="4" rx="5" ry="2.5" fill={c.bloomDeep} />
+                <circle cx="0" cy="-1" r="2.5" fill={c.bloomDeep} />
+                <circle cx="0" cy="-1" r="1.2" fill={c.bloom} />
+              </g>
+            )}
+          </g>
+        );
+      };
+
+      const renderLeafy = () => {
+        if (stage === 0) return <ellipse cx={W / 2} cy={GY - 3} rx={5} ry={2.5} fill={c.leafShadow} />;
+        const baseLeaf = (cx, cy, rx, ry, rot, fill, key) => (
+          <ellipse key={key} cx={cx} cy={cy} rx={rx} ry={ry} fill={fill} transform={`rotate(${rot} ${cx} ${cy})`} />
+        );
+        if (stage === 1) return (
+          <g transform={wilted ? `rotate(-15 ${W / 2} ${GY})` : ''}>
+            <path d={`M${W / 2} ${GY} L ${W / 2} ${GY - 8}`} stroke={c.stemDark} strokeWidth="2" strokeLinecap="round" />
+            {baseLeaf(W / 2 - 4, GY - 10, 7, 4, -25, c.leaf, 'l1')}
+            {baseLeaf(W / 2 + 5, GY - 12, 7, 4, 25, c.leafLight, 'l2')}
+          </g>
+        );
+        return (
+          <g transform={wilted ? `rotate(-12 ${W / 2} ${GY + 5}) translate(0, 6)` : ''}>
+            <path d={`M${W / 2} ${GY} L ${W / 2} ${GY - 18}`} stroke={c.stemDark} strokeWidth="3" strokeLinecap="round" />
+            {baseLeaf(W / 2 - 15, GY - 10, 12, 6, -48, c.leafDeep, 'b1')}
+            {baseLeaf(W / 2 + 15, GY - 10, 12, 6, 48, c.leafDeep, 'b2')}
+            {baseLeaf(W / 2, GY - 16, 8, 11, 0, c.leafDeep, 'b3')}
+            {stage >= 2 && (
+              <React.Fragment>
+                {baseLeaf(W / 2 - 13, GY - 22, 11, 5.5, -30, c.leaf, 'm1')}
+                {baseLeaf(W / 2 + 13, GY - 22, 11, 5.5, 30, c.leaf, 'm2')}
+                {baseLeaf(W / 2 - 4, GY - 28, 7, 11, -10, c.leaf, 'm3')}
+                {baseLeaf(W / 2 + 4, GY - 28, 7, 11, 10, c.leaf, 'm4')}
+              </React.Fragment>
+            )}
+            {stage >= 3 && (
+              <React.Fragment>
+                {baseLeaf(W / 2 - 8, GY - 38, 8, 5, -25, c.leafLight, 't1')}
+                {baseLeaf(W / 2 + 8, GY - 38, 8, 5, 25, c.leafLight, 't2')}
+                {baseLeaf(W / 2, GY - 44, 6, 9, 0, c.leafLight, 't3')}
+              </React.Fragment>
+            )}
+            {stage === 4 && (
+              <React.Fragment>
+                <circle cx={W / 2 - 10} cy={GY - 40} r="3.5" fill={c.bloom} />
+                <circle cx={W / 2 + 8} cy={GY - 46} r="3.5" fill={c.bloom} />
+                <circle cx={W / 2} cy={GY - 52} r="3.5" fill={c.bloomDeep} />
+              </React.Fragment>
+            )}
+          </g>
+        );
+      };
+
+      const renderSucculent = () => {
+        if (stage === 0) return <ellipse cx={W / 2} cy={GY - 4} rx={6} ry={3} fill={c.leafShadow} />;
+        const blade = (cx, cy, rx, ry, rot, fill, key) => (
+          <ellipse key={key} cx={cx} cy={cy} rx={rx} ry={ry} fill={fill} transform={`rotate(${rot} ${cx} ${cy})`} />
+        );
+        const scale = stage === 1 ? 0.55 : stage === 2 ? 0.8 : stage === 3 ? 1 : 1.1;
+        const ty = GY - 10 * scale;
+        return (
+          <g transform={`translate(${W / 2} ${ty}) scale(${scale}) ${wilted ? 'translate(0, 4) skewX(-8)' : ''}`}>
+            {blade(0, -8, 5, 18, 0, c.leafDeep, 'b1')}
+            {blade(-12, 0, 5, 16, -45, c.leafDeep, 'b2')}
+            {blade(12, 0, 5, 16, 45, c.leafDeep, 'b3')}
+            {blade(-8, 4, 5, 14, -70, c.leaf, 'b4')}
+            {blade(8, 4, 5, 14, 70, c.leaf, 'b5')}
+            {stage >= 2 && (
+              <React.Fragment>
+                {blade(0, -4, 4, 12, 0, c.leafLight, 'f1')}
+                {blade(-6, 0, 4, 11, -30, c.leafLight, 'f2')}
+                {blade(6, 0, 4, 11, 30, c.leafLight, 'f3')}
+              </React.Fragment>
+            )}
+            {stage >= 3 && <circle cx="0" cy="-2" r="3" fill={c.leafLight} />}
+            {stage === 4 && (
+              <g transform="translate(0, -22)">
+                <circle r="3.5" fill={c.bloomPink} />
+                <circle r="1.5" fill={c.bloom} />
+              </g>
+            )}
+          </g>
+        );
+      };
+
+      const renderFern = () => {
+        if (stage === 0) return <ellipse cx={W / 2} cy={GY - 4} rx={5} ry={2.5} fill={c.leafShadow} />;
+        const frond = (rot, len, fill, key) => {
+          const pts = [];
+          for (let i = 1; i <= 7; i++) {
+            const t = i / 7;
+            const r = (1 - Math.pow(t - 0.5, 2) * 3) * 5;
+            pts.push({ t, r });
+          }
+          return (
+            <g key={key} transform={`rotate(${rot} ${W / 2} ${GY}) translate(${W / 2} ${GY})`}>
+              <path d={`M0 0 Q ${len * 0.3} ${-len * 0.6}, ${len * 0.1} ${-len}`}
+                stroke={fill} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              {pts.map((p, i) => (
+                <ellipse key={i}
+                  cx={len * 0.3 * (1 - Math.pow(p.t - 0.5, 2) * 2) + (p.t * len * 0.05)}
+                  cy={-p.t * len + p.t * len * 0.05}
+                  rx={p.r * 0.7} ry={1.6} fill={fill}
+                  transform={`rotate(${-30 + p.t * 50} ${len * 0.2} ${-p.t * len})`} />
+              ))}
+            </g>
+          );
+        };
+        const len = stage === 1 ? 22 : stage === 2 ? 38 : stage === 3 ? 55 : 65;
+        const droop = wilted ? 25 : 0;
+        return (
+          <g transform={wilted ? `translate(0,4)` : ''}>
+            {frond(-35 + droop, len, c.leafDeep, 'f1')}
+            {frond(35 - droop, len, c.leafDeep, 'f2')}
+            {stage >= 2 && frond(-15 + droop * 0.7, len * 1.1, c.leaf, 'f3')}
+            {stage >= 2 && frond(15 - droop * 0.7, len * 1.1, c.leaf, 'f4')}
+            {stage >= 3 && frond(0, len * 1.15, c.leafLight, 'f5')}
+          </g>
+        );
+      };
+
+      const renderHerb = () => {
+        if (stage === 0) return <ellipse cx={W / 2} cy={GY - 4} rx={4} ry={2} fill={c.leafShadow} />;
+        if (stage === 1) return (
+          <g transform={wilted ? `rotate(-18 ${W / 2} ${GY})` : ''}>
+            <path d={`M${W / 2} ${GY} L ${W / 2} ${GY - 14}`} stroke={c.stem} strokeWidth="2" />
+            <ellipse cx={W / 2 - 4} cy={GY - 14} rx={5} ry={2.5} fill={c.leaf} transform={`rotate(-30 ${W / 2 - 4} ${GY - 14})`} />
+            <ellipse cx={W / 2 + 4} cy={GY - 14} rx={5} ry={2.5} fill={c.leafLight} transform={`rotate(30 ${W / 2 + 4} ${GY - 14})`} />
+          </g>
+        );
+        const stems = [
+          { x: -12, h: 0.85, c: c.leafDeep },
+          { x: 0, h: 1, c: c.leaf },
+          { x: 12, h: 0.9, c: c.leafLight },
+        ];
+        const baseH = stage === 2 ? 28 : stage === 3 ? 42 : 52;
+        return (
+          <g transform={wilted ? `translate(0,5)` : ''}>
+            {stems.map((s, i) => {
+              const h = baseH * s.h;
+              const tilt = wilted ? (i - 1) * 18 : (i - 1) * 4;
+              return (
+                <g key={i} transform={`translate(${W / 2 + s.x} ${GY}) rotate(${tilt})`}>
+                  <path d={`M0 0 Q ${i === 0 ? -2 : 2} ${-h * 0.5}, 0 ${-h}`}
+                    stroke={s.c} strokeWidth="2" fill="none" strokeLinecap="round" />
+                  {[0.35, 0.6, 0.85].map((t, j) => (
+                    <g key={j} transform={`translate(0, ${-h * t})`}>
+                      <ellipse cx="-5" cy="0" rx="5" ry="2.2" fill={s.c} transform="rotate(-25)" />
+                      <ellipse cx="5" cy="0" rx="5" ry="2.2" fill={s.c} transform="rotate(25)" />
+                    </g>
+                  ))}
+                  {stage === 4 && <circle cx="0" cy={-h - 2} r="2.5" fill={c.bloom} />}
+                </g>
+              );
+            })}
+          </g>
+        );
+      };
+
+      const renderers = { lotus: renderLotus, leafy: renderLeafy, succulent: renderSucculent, fern: renderFern, herb: renderHerb };
+      const renderer = renderers[species] || renderLeafy;
+
+      return (
+        <svg width={size} height={size * (H / W)} viewBox={`0 0 ${W} ${H}`} style={{ overflow: 'visible' }}>
+          <SoilPatch cx={W / 2} cy={GY + 1} w={66} />
+          {renderer()}
+        </svg>
+      );
+    }
+
+    const STAGE_NAMES = ['Seed', 'Sprout', 'Sapling', 'Bushed', 'In bloom'];
+    const SPECIES_LABEL = {
+      lotus: 'Moonlit lotus', leafy: 'Wild basil', succulent: 'Desert rose',
+      fern: 'Boston fern', herb: 'Field clover',
+    };
+    const INITIAL_HABITS = [
+      { id: 'h1', name: 'Morning meditation', species: 'lotus', stage: 4, streak: 23, wilted: false, doneToday: true, cadence: '10 min · sunrise', note: 'Sit before the day starts.' },
+      { id: 'h2', name: 'Read 20 pages', species: 'leafy', stage: 3, streak: 11, wilted: false, doneToday: true, cadence: '20 pages · evening', note: 'Currently: The Overstory.' },
+      { id: 'h3', name: 'Drink 2L water', species: 'succulent', stage: 2, streak: 6, wilted: false, doneToday: false, cadence: '2 litres · all day', note: 'Glass on the desk, refill at lunch.' },
+      { id: 'h4', name: 'Run 2 miles', species: 'fern', stage: 2, streak: 0, wilted: true, doneToday: false, cadence: '2 mi · before work', note: 'Missed 4 days. A little water will bring it back.' },
+      { id: 'h5', name: 'Journal a page', species: 'herb', stage: 1, streak: 2, wilted: false, doneToday: false, cadence: '1 page · before bed', note: 'Plain pen, plain page.' },
+      { id: 'h6', name: 'Stretch routine', species: 'fern', stage: 3, streak: 9, wilted: false, doneToday: false, cadence: '8 min · midday', note: 'Hamstrings, hips, shoulders.' },
+      { id: 'h7', name: 'No phone before 9am', species: 'lotus', stage: 3, streak: 14, wilted: false, doneToday: true, cadence: 'until 9am · daily', note: 'Coffee first. Light first.' },
+      { id: 'h8', name: 'Walk 5,000 steps', species: 'herb', stage: 4, streak: 31, wilted: false, doneToday: false, cadence: '5k steps · daily', note: 'After lunch is the easiest time.' },
+    ];
+
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "timeOfDay": 45,
+      "gardenMood": 17,
+      "plantDensity": 8
+    }/*EDITMODE-END*/;
+
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const lerpHex = (h1, h2, t) => {
+      const p = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+      const [r1, g1, b1] = p(h1), [r2, g2, b2] = p(h2);
+      const fmt = (n) => Math.round(n).toString(16).padStart(2, '0');
+      return `#${fmt(lerp(r1, r2, t))}${fmt(lerp(g1, g2, t))}${fmt(lerp(b1, b2, t))}`;
+    };
+    const TOD_KEYS = [
+      { t: 0, top: '#3b2a3e', mid: '#5a3a4a', bot: '#7a4a48', amberGlow: 0.35, moonOpacity: 0.35, starOpacity: 0.1, bodyColor: '#f6c8a8', glowColor: '255,180,160' },
+      { t: 33, top: '#6a96b0', mid: '#9bc0c8', bot: '#c5dcd8', amberGlow: 0.05, moonOpacity: 0, starOpacity: 0, bodyColor: '#fff4c0', glowColor: '255,230,140' },
+      { t: 66, top: '#2a1f1a', mid: '#5a3220', bot: '#8a4828', amberGlow: 0.45, moonOpacity: 0.55, starOpacity: 0.12, bodyColor: '#f0b478', glowColor: '240,160,80' },
+      { t: 100, top: '#0a1612', mid: '#0e1d18', bot: '#16201a', amberGlow: 0.12, moonOpacity: 1, starOpacity: 0.42, bodyColor: '#f0d9a8', glowColor: '240,217,168' },
+    ];
+    function todPalette(tod) {
+      const v = Math.max(0, Math.min(100, tod));
+      let i = 0;
+      while (i < TOD_KEYS.length - 1 && v > TOD_KEYS[i + 1].t) i++;
+      const a = TOD_KEYS[i], b = TOD_KEYS[Math.min(i + 1, TOD_KEYS.length - 1)];
+      const span = b.t - a.t || 1;
+      const t = (v - a.t) / span;
+      return {
+        top: lerpHex(a.top, b.top, t),
+        mid: lerpHex(a.mid, b.mid, t),
+        bot: lerpHex(a.bot, b.bot, t),
+        amberGlow: lerp(a.amberGlow, b.amberGlow, t),
+        moonOpacity: lerp(a.moonOpacity, b.moonOpacity, t),
+        starOpacity: lerp(a.starOpacity, b.starOpacity, t),
+        bodyColor: lerpHex(a.bodyColor, b.bodyColor, t),
+        glowColor: a.glowColor,
+        isDaytime: v > 20 && v < 55,
+      };
+    }
+    function moodOverlay(mood) {
+      if (mood < 50) {
+        const k = (50 - mood) / 50;
+        return { tint: `rgba(80, 130, 180, ${k * 0.14})`, saturate: 1 + k * 0.05 };
+      }
+      const k = (mood - 50) / 50;
+      return { tint: `rgba(210, 90, 40, ${k * 0.18})`, saturate: 1 - k * 0.25 };
+    }
+    function genSlots(n) {
+      n = Math.max(1, Math.min(8, n));
+      const back = n <= 2 ? 0 : Math.ceil((n - 2) / 2);
+      const front = n - back;
+      const slots = [];
+      for (let i = 0; i < back; i++) {
+        const x = back === 1 ? 50 : 16 + (i / (back - 1)) * 68;
+        const wobble = (i % 2) * 10;
+        slots.push({ l: `${x}%`, b: 246 + wobble, s: 54 + (i % 3) * 2, z: 2 });
+      }
+      for (let i = 0; i < front; i++) {
+        const x = front === 1 ? 50 : 22 + (i / (front - 1)) * 56;
+        const stagger = (i % 2) * 12;
+        slots.push({ l: `${x}%`, b: 158 + stagger, s: 108 + (i % 2) * 10, z: 5 + i });
+      }
+      return slots;
+    }
+
+    function SceneBackground({ tweaks }) {
+      const tod = todPalette(tweaks.timeOfDay);
+      const mood = moodOverlay(tweaks.gardenMood);
+      const fireflies = useMemo(
+        () => Array.from({ length: 14 }, (_, i) => ({
+          id: i,
+          x: 8 + Math.random() * 84,
+          y: 8 + Math.random() * 60,
+          d: 3 + Math.random() * 4,
+          delay: Math.random() * 4,
+        })),
+        []
+      );
+      const fireflyOpacity = tod.starOpacity > 0.2 ? 1 : tod.starOpacity > 0.05 ? 0.5 : 0;
+      return (
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: `radial-gradient(ellipse 70% 50% at 78% 18%, rgba(240,217,168,${tod.amberGlow}), transparent 60%),
+                       radial-gradient(ellipse 90% 60% at 50% 100%, rgba(212,162,94,${tod.amberGlow * 0.4}), transparent 70%),
+                       linear-gradient(180deg, ${tod.top} 0%, ${tod.mid} 55%, ${tod.bot} 100%)`,
+          }} />
+          <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, opacity: tod.starOpacity }}>
+            {Array.from({ length: 18 }).map((_, i) => {
+              const x = (i * 37) % 100;
+              const y = (i * 19) % 35;
+              return <circle key={i} cx={`${x}%`} cy={`${y}%`} r={i % 5 === 0 ? 0.9 : 0.5} fill="#f0e8d5" />;
+            })}
+          </svg>
+          <div style={{
+            position: 'absolute', top: 64, right: 34, width: 48, height: 48, borderRadius: '50%',
+            background: tod.isDaytime
+              ? `radial-gradient(circle at 35% 35%, ${tod.bodyColor}, #f0b850 75%, #c98030)`
+              : `radial-gradient(circle at 35% 35%, ${tod.bodyColor}, #c9a878 80%, #8a6f47)`,
+            boxShadow: tod.isDaytime
+              ? `0 0 50px rgba(${tod.glowColor},0.5), 0 0 100px rgba(${tod.glowColor},0.3)`
+              : `0 0 40px rgba(${tod.glowColor},${tod.moonOpacity * 0.3}), 0 0 80px rgba(${tod.glowColor},${tod.moonOpacity * 0.18})`,
+            opacity: Math.max(tod.moonOpacity, tod.isDaytime ? 1 : 0),
+            transition: 'opacity 250ms ease',
+          }}>
+            {!tod.isDaytime && (
+              <React.Fragment>
+                <div style={{ position: 'absolute', top: 8, left: 12, width: 7, height: 5, borderRadius: '50%', background: 'rgba(0,0,0,0.08)' }} />
+                <div style={{ position: 'absolute', top: 24, left: 26, width: 5, height: 4, borderRadius: '50%', background: 'rgba(0,0,0,0.08)' }} />
+              </React.Fragment>
+            )}
+          </div>
+          <svg viewBox="0 0 390 500" preserveAspectRatio="none"
+            style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '100%' }}>
+            <path d="M0 200 L 40 180 L 80 195 L 120 165 L 170 185 L 220 170 L 260 190 L 310 175 L 360 195 L 390 180 L 390 500 L 0 500 Z"
+              fill="#0d1f1a" opacity={tod.isDaytime ? 0.35 : 0.7} />
+          </svg>
+          <div style={{
+            position: 'absolute', left: 0, right: 0, top: '38%', height: 90,
+            background: 'linear-gradient(180deg, rgba(168,180,158,0) 0%, rgba(168,180,158,0.10) 50%, rgba(168,180,158,0) 100%)',
+            filter: 'blur(8px)', pointerEvents: 'none',
+          }} />
+          <svg viewBox="0 0 390 500" preserveAspectRatio="none"
+            style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '100%' }}>
+            <path d="M0 220 Q 80 185, 160 205 T 320 195 L 390 215 L 390 500 L 0 500 Z" fill={P.hillFar} opacity="0.9" />
+            <path d="M0 275 Q 100 235, 200 265 T 390 265 L 390 500 L 0 500 Z" fill={P.hillMid} opacity="0.95" />
+            <path d="M0 330 Q 120 300, 250 330 T 390 320 L 390 500 L 0 500 Z" fill={P.hillNear} />
+          </svg>
+          <svg viewBox="0 0 390 500" preserveAspectRatio="none"
+            style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+            {[
+              { x: 30, y: 218, h: 22 }, { x: 55, y: 216, h: 16 }, { x: 75, y: 218, h: 20 },
+              { x: 110, y: 210, h: 26 }, { x: 130, y: 213, h: 18 },
+              { x: 175, y: 214, h: 22 }, { x: 200, y: 216, h: 24 },
+              { x: 245, y: 213, h: 20 }, { x: 270, y: 215, h: 16 }, { x: 290, y: 214, h: 24 },
+              { x: 330, y: 218, h: 18 }, { x: 355, y: 220, h: 22 },
+            ].map((t, i) => (
+              <path key={i}
+                d={`M${t.x} ${t.y} L ${t.x - 4} ${t.y} L ${t.x} ${t.y - t.h} L ${t.x + 4} ${t.y} Z`}
+                fill="#0e2018" opacity="0.85" />
+            ))}
+          </svg>
+          <div style={{
+            position: 'absolute', left: 0, right: 0, top: '52%', height: 70,
+            background: 'linear-gradient(180deg, rgba(200,210,190,0) 0%, rgba(180,195,170,0.08) 50%, rgba(180,195,170,0) 100%)',
+            filter: 'blur(6px)', pointerEvents: 'none',
+          }} />
+          {fireflies.map((f) => (
+            <div key={f.id} style={{
+              position: 'absolute', left: `${f.x}%`, top: `${f.y}%`,
+              width: f.d, height: f.d, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(240,217,168,0.9), rgba(240,217,168,0) 70%)',
+              animation: `firefly ${4 + f.delay}s ease-in-out ${f.delay}s infinite`,
+              opacity: fireflyOpacity,
+            }} />
+          ))}
+          <div style={{
+            position: 'absolute', inset: 0, background: mood.tint, mixBlendMode: 'overlay',
+            pointerEvents: 'none',
+          }} />
+        </div>
+      );
+    }
+
+    function GardenBed() {
+      return (
+        <svg viewBox="0 0 390 220" preserveAspectRatio="none"
+          style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: 220, pointerEvents: 'none' }}>
+          <defs>
+            <linearGradient id="bedGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#2e2418" />
+              <stop offset="60%" stopColor="#1f1810" />
+              <stop offset="100%" stopColor="#15100a" />
+            </linearGradient>
+          </defs>
+          <path d="M -20 130 Q 80 90, 200 110 Q 310 130, 410 100 L 410 240 L -20 240 Z" fill="#1a1209" opacity="0.85" />
+          <path d="M -20 170 Q 100 130, 220 150 Q 320 170, 410 140 L 410 240 L -20 240 Z" fill="url(#bedGrad)" />
+          {[[40, 175], [90, 195], [150, 180], [220, 200], [280, 185], [340, 195]].map(([x, y], i) => (
+            <ellipse key={i} cx={x} cy={y} rx={3} ry={1.2} fill="#0a0703" opacity="0.5" />
+          ))}
+          {[20, 70, 130, 180, 240, 300, 360].map((x, i) => (
+            <g key={i} transform={`translate(${x}, ${165 + (i % 2) * 6})`} opacity="0.6">
+              <path d="M0 0 Q 1 -4, 0 -8" stroke="#3d5e3f" strokeWidth="1" fill="none" />
+              <path d="M2 0 Q 4 -5, 3 -9" stroke="#4a7d5a" strokeWidth="1" fill="none" />
+            </g>
+          ))}
+        </svg>
+      );
+    }
+
+    function GardenPlant({ habit, size, onTap, watering }) {
+      const [pressed, setPressed] = useState(false);
+      return (
+        <button
+          onPointerDown={() => setPressed(true)}
+          onPointerUp={() => setPressed(false)}
+          onPointerLeave={() => setPressed(false)}
+          onClick={onTap}
+          style={{
+            position: 'absolute', left: 0, bottom: 0, width: size, height: size * (140 / 120),
+            transform: `translateX(-50%) scale(${pressed ? 0.96 : watering ? 1.06 : 1})`,
+            transformOrigin: 'bottom center',
+            transition: 'transform 250ms cubic-bezier(.2,.9,.3,1.4)',
+            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+            filter: habit.doneToday && !habit.wilted ? 'drop-shadow(0 0 14px rgba(168,211,158,0.35))' : 'none',
+          }}
+          aria-label={habit.name}
+        >
+          <Plant species={habit.species} stage={habit.stage} wilted={habit.wilted} size={size} />
+          {habit.doneToday && !habit.wilted && (
+            <div style={{
+              position: 'absolute', top: 4, right: 6, width: 10, height: 10, borderRadius: '50%',
+              background: P.amberWarm, boxShadow: `0 0 8px ${P.amberWarm}`,
+            }} />
+          )}
+          {habit.wilted && (
+            <div style={{
+              position: 'absolute', top: 4, right: 6, width: 10, height: 10, borderRadius: '50%',
+              background: '#7a5a2a',
+            }} />
+          )}
+          {watering && [0, 1, 2, 3].map((i) => (
+            <div key={i} style={{
+              position: 'absolute', left: `${30 + i * 15}%`, top: -10,
+              width: 4, height: 7, borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+              background: '#6fa8d4', opacity: 0.85,
+              animation: `drop 900ms ease-in ${i * 80}ms forwards`,
+            }} />
+          ))}
+        </button>
+      );
+    }
+
+    function StatTile({ label, value, accent }) {
+      return (
+        <div style={{
+          padding: '12px 12px', borderRadius: 14,
+          background: accent ? 'rgba(212,162,94,0.10)' : 'rgba(240,232,213,0.05)',
+          border: `1px solid ${accent ? 'rgba(212,162,94,0.25)' : 'rgba(240,232,213,0.07)'}`,
+        }}>
+          <div style={{
+            fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase',
+            color: accent ? P.amberWarm : P.muted, marginBottom: 4
+          }}>{label}</div>
+          <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 22, color: P.cream }}>{value}</div>
+        </div>
+      );
+    }
+
+    function FieldLabel({ children }) {
+      return (
+        <div style={{
+          fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase',
+          color: P.muted, marginBottom: 8
+        }}>{children}</div>
+      );
+    }
+
+    function DetailSheet({ habit, onClose, onWater, onRevive }) {
+      if (!habit) return null;
+      const stage = habit.wilted ? 'Wilted' : STAGE_NAMES[habit.stage];
+      return (
+        <React.Fragment>
+          <div onClick={onClose} style={{
+            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 90,
+            animation: 'fadeIn 240ms ease',
+          }} />
+          <div style={{
+            position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 100,
+            background: `linear-gradient(180deg, #1d2a23 0%, #15201a 100%)`,
+            borderRadius: '28px 28px 0 0',
+            padding: '14px 22px 50px',
+            border: `1px solid rgba(168,211,158,0.08)`,
+            boxShadow: '0 -20px 60px rgba(0,0,0,0.5)',
+            animation: 'sheetUp 320ms cubic-bezier(.2,.8,.2,1)',
+          }}>
+            <div style={{ width: 44, height: 4, borderRadius: 2, background: 'rgba(240,232,213,0.25)', margin: '0 auto 18px' }} />
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end' }}>
+              <div style={{ width: 120, height: 130, marginBottom: -10, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                <Plant species={habit.species} stage={habit.stage} wilted={habit.wilted} size={108} />
+              </div>
+              <div style={{ flex: 1, paddingBottom: 4 }}>
+                <div style={{
+                  fontFamily: 'serif', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase',
+                  color: P.amberWarm, opacity: 0.85, marginBottom: 4
+                }}>
+                  {SPECIES_LABEL[habit.species]}
+                </div>
+                <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 26, color: P.cream, lineHeight: 1.05 }}>
+                  {habit.name}
+                </div>
+                <div style={{ fontSize: 13, color: P.creamMuted, marginTop: 6 }}>{habit.cadence}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: 22 }}>
+              <StatTile label="Streak" value={`${habit.streak}d`} accent />
+              <StatTile label="Stage" value={stage} />
+              <StatTile label="Today" value={habit.doneToday ? 'Tended' : 'Thirsty'} />
+            </div>
+
+            <div style={{ marginTop: 22 }}>
+              <div style={{ fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', color: P.muted, marginBottom: 10 }}>Growth</div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 5, height: 96 }}>
+                {STAGE_NAMES.map((s, i) => {
+                  const active = !habit.wilted && i === habit.stage;
+                  const reached = !habit.wilted && i <= habit.stage;
+                  return (
+                    <div key={s} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                      <div style={{
+                        width: '100%', height: 70, position: 'relative',
+                        borderRadius: 10,
+                        background: active
+                          ? 'linear-gradient(180deg, rgba(232,184,122,0.18), rgba(232,184,122,0.04))'
+                          : reached ? 'rgba(168,211,158,0.06)' : 'rgba(240,232,213,0.03)',
+                        border: `1px solid ${active ? 'rgba(232,184,122,0.55)' : 'rgba(240,232,213,0.06)'}`,
+                        boxShadow: active ? '0 0 16px rgba(232,184,122,0.35), inset 0 0 12px rgba(232,184,122,0.10)' : 'none',
+                        overflow: 'hidden',
+                        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+                        opacity: reached ? 1 : 0.45,
+                        transition: 'all 200ms ease',
+                      }}>
+                        {active && (
+                          <div style={{
+                            position: 'absolute', top: 4, right: 4, width: 5, height: 5, borderRadius: '50%',
+                            background: P.amberWarm, boxShadow: `0 0 6px ${P.amberWarm}`,
+                          }} />
+                        )}
+                        <div style={{
+                          filter: !reached ? 'grayscale(0.85) brightness(0.7)' : 'none',
+                          marginBottom: -4,
+                        }}>
+                          <Plant species={habit.species} stage={i} wilted={false} size={46} />
+                        </div>
+                      </div>
+                      <div style={{
+                        fontSize: 9, letterSpacing: 0.5,
+                        color: active ? P.amberWarm : reached ? P.cream : P.muted,
+                        fontWeight: active ? 700 : 500,
+                        textTransform: active ? 'uppercase' : 'none',
+                      }}>{s}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{
+              marginTop: 18, padding: '12px 14px', borderRadius: 14,
+              background: 'rgba(240,232,213,0.04)', border: '1px solid rgba(240,232,213,0.06)',
+              fontSize: 13, color: P.creamMuted, lineHeight: 1.5, fontStyle: 'italic',
+            }}>
+              “{habit.note}”
+            </div>
+
+            <button
+              onClick={habit.wilted ? onRevive : onWater}
+              disabled={habit.doneToday && !habit.wilted}
+              style={{
+                marginTop: 18, width: '100%', height: 56, borderRadius: 28,
+                background: habit.doneToday && !habit.wilted
+                  ? 'rgba(168,211,158,0.15)'
+                  : habit.wilted
+                    ? `linear-gradient(135deg, ${P.amber}, ${P.amberWarm})`
+                    : `linear-gradient(135deg, ${P.leafDeep}, ${P.leaf})`,
+                color: habit.doneToday && !habit.wilted ? P.muted : '#0e1d18',
+                border: 'none', fontSize: 16, fontWeight: 700, letterSpacing: 0.3,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                cursor: habit.doneToday && !habit.wilted ? 'default' : 'pointer',
+                boxShadow: habit.doneToday && !habit.wilted ? 'none' : '0 8px 24px rgba(126,181,134,0.25)',
+              }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3 C 8 9, 5 13, 5 16 a 7 7 0 0 0 14 0 c 0 -3, -3 -7, -7 -13z"
+                  fill={habit.doneToday && !habit.wilted ? P.muted : '#0e1d18'} />
+              </svg>
+              {habit.wilted ? 'Revive this plant' : habit.doneToday ? 'Already tended today' : 'Water now'}
+            </button>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    function AddSheet({ onClose, onAdd }) {
+      const [name, setName] = useState('');
+      const [species, setSpecies] = useState('lotus');
+      const [cadence, setCadence] = useState('Daily · morning');
+      const speciesList = ['lotus', 'leafy', 'succulent', 'fern', 'herb'];
+      return (
+        <React.Fragment>
+          <div onClick={onClose} style={{
+            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 90,
+            animation: 'fadeIn 240ms ease',
+          }} />
+          <div style={{
+            position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 100,
+            background: `linear-gradient(180deg, #1d2a23 0%, #15201a 100%)`,
+            borderRadius: '28px 28px 0 0',
+            padding: '14px 22px 50px',
+            border: `1px solid rgba(168,211,158,0.08)`,
+            boxShadow: '0 -20px 60px rgba(0,0,0,0.5)',
+            animation: 'sheetUp 320ms cubic-bezier(.2,.8,.2,1)',
+          }}>
+            <div style={{ width: 44, height: 4, borderRadius: 2, background: 'rgba(240,232,213,0.25)', margin: '0 auto 18px' }} />
+            <div style={{ fontFamily: 'serif', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: P.amberWarm, marginBottom: 6 }}>Plant a new habit</div>
+            <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 28, color: P.cream, lineHeight: 1.1 }}>
+              What will you tend?
+            </div>
+
+            <div style={{ marginTop: 22 }}>
+              <FieldLabel>Habit name</FieldLabel>
+              <input
+                value={name} onChange={(e) => setName(e.target.value)}
+                placeholder="Stretch for 10 minutes…"
+                style={{
+                  width: '100%', boxSizing: 'border-box',
+                  background: 'rgba(240,232,213,0.05)',
+                  border: '1px solid rgba(240,232,213,0.1)',
+                  borderRadius: 14, padding: '14px 16px',
+                  fontSize: 15, color: P.cream, fontFamily: 'inherit', outline: 'none',
+                }} />
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+              <FieldLabel>Cadence</FieldLabel>
+              <input
+                value={cadence} onChange={(e) => setCadence(e.target.value)}
+                style={{
+                  width: '100%', boxSizing: 'border-box',
+                  background: 'rgba(240,232,213,0.05)',
+                  border: '1px solid rgba(240,232,213,0.1)',
+                  borderRadius: 14, padding: '14px 16px',
+                  fontSize: 15, color: P.cream, fontFamily: 'inherit', outline: 'none',
+                }} />
+            </div>
+
+            <div style={{ marginTop: 18 }}>
+              <FieldLabel>Choose a plant</FieldLabel>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+                {speciesList.map((s) => (
+                  <button key={s} onClick={() => setSpecies(s)}
+                    style={{
+                      background: species === s ? 'rgba(168,211,158,0.15)' : 'rgba(240,232,213,0.04)',
+                      border: `1px solid ${species === s ? 'rgba(168,211,158,0.5)' : 'rgba(240,232,213,0.07)'}`,
+                      borderRadius: 12, padding: '6px 4px 4px',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      cursor: 'pointer',
+                    }}>
+                    <div style={{ height: 60, display: 'flex', alignItems: 'flex-end' }}>
+                      <Plant species={s} stage={3} size={48} />
+                    </div>
+                    <div style={{ fontSize: 9, color: P.creamMuted, textTransform: 'capitalize', marginTop: 2 }}>{s}</div>
+                  </button>
+                ))}
+              </div>
+              <div style={{ fontSize: 11, color: P.muted, marginTop: 8, fontStyle: 'italic' }}>
+                {SPECIES_LABEL[species]}
+              </div>
+            </div>
+
+            <button
+              onClick={() => name.trim() && onAdd({ name: name.trim(), species, cadence })}
+              disabled={!name.trim()}
+              style={{
+                marginTop: 24, width: '100%', height: 56, borderRadius: 28,
+                background: name.trim()
+                  ? `linear-gradient(135deg, ${P.leafDeep}, ${P.leaf})`
+                  : 'rgba(240,232,213,0.08)',
+                color: name.trim() ? '#0e1d18' : P.muted,
+                border: 'none', fontSize: 16, fontWeight: 700, letterSpacing: 0.3,
+                cursor: name.trim() ? 'pointer' : 'default',
+                boxShadow: name.trim() ? '0 8px 24px rgba(126,181,134,0.25)' : 'none',
+              }}>
+              Plant the seed
+            </button>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    function BottomNav({ active, onTab, onAdd }) {
+      const items = [
+        { id: 'garden', label: 'Garden', icon: 'leaf' },
+        { id: 'almanac', label: 'Almanac', icon: 'book' },
+        { id: 'add', label: '', icon: 'plus' },
+        { id: 'grow', label: 'Grow', icon: 'chart' },
+        { id: 'me', label: 'Me', icon: 'user' },
+      ];
+      const Icon = ({ name, active, plus }) => {
+        const stroke = active ? P.cream : P.muted;
+        if (name === 'leaf') return <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M20 4c0 9-5 16-13 16C7 11 12 4 20 4z" stroke={stroke} strokeWidth="1.6" strokeLinejoin="round" /><path d="M7 20 L 14 13" stroke={stroke} strokeWidth="1.6" strokeLinecap="round" /></svg>;
+        if (name === 'book') return <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2V5z" stroke={stroke} strokeWidth="1.6" strokeLinejoin="round" /><path d="M8 7h7M8 11h7" stroke={stroke} strokeWidth="1.6" strokeLinecap="round" /></svg>;
+        if (name === 'chart') return <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16" stroke={stroke} strokeWidth="1.6" strokeLinecap="round" /><path d="M8 15v-4M12 15V8M16 15v-6" stroke={stroke} strokeWidth="1.6" strokeLinecap="round" /></svg>;
+        if (name === 'user') return <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke={stroke} strokeWidth="1.6" /><path d="M4 21c0-4 4-7 8-7s8 3 8 7" stroke={stroke} strokeWidth="1.6" strokeLinecap="round" /></svg>;
+        if (name === 'plus') return <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke={plus ? '#0e1d18' : stroke} strokeWidth="2.2" strokeLinecap="round" /></svg>;
+        return null;
+      };
+      return (
+        <div style={{
+          position: 'absolute', left: 14, right: 14, bottom: 18, zIndex: 70,
+          height: 68, borderRadius: 34, overflow: 'visible',
+        }}>
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: 34,
+            background: 'rgba(14, 24, 19, 0.92)',
+            border: '1px solid rgba(240,232,213,0.08)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
+          }} />
+          <div style={{ position: 'relative', height: '100%', display: 'flex', alignItems: 'center', padding: '0 6px' }}>
+            {items.map((it) => {
+              if (it.id === 'add') {
+                return (
+                  <div key="add" style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                    <button onClick={onAdd}
+                      style={{
+                        width: 56, height: 56, borderRadius: '50%',
+                        background: `linear-gradient(135deg, ${P.amberWarm}, ${P.amber})`,
+                        border: '3px solid #15201a',
+                        marginTop: -22,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: '0 10px 28px rgba(212,162,94,0.4), 0 0 0 1px rgba(232,184,122,0.4)',
+                      }}>
+                      <Icon name="plus" plus />
+                    </button>
+                  </div>
+                );
+              }
+              const isActive = active === it.id;
+              return (
+                <button key={it.id} onClick={() => onTab(it.id)}
+                  style={{
+                    flex: 1, background: 'none', border: 'none', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                    paddingTop: 4,
+                  }}>
+                  <Icon name={it.icon} active={isActive} />
+                  <span style={{
+                    fontSize: 10, letterSpacing: 0.5,
+                    color: isActive ? P.cream : P.muted,
+                    fontWeight: isActive ? 600 : 400
+                  }}>{it.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    function TopBar({ habits, tab }) {
+      const tended = habits.filter((h) => h.doneToday).length;
+      const total = habits.length;
+      const cfg = {
+        garden: { eyebrow: 'Tuesday · evening', line1: 'Welcome back,', line2: 'Maya.' },
+        almanac: { eyebrow: 'The almanac', line1: 'Every plant', line2: 'remembered.' },
+        grow: { eyebrow: 'Field notes', line1: 'What the', line2: 'garden noticed.' },
+        me: { eyebrow: 'Your garden', line1: 'Maya\u2019s', line2: 'almanac.' },
+      }[tab] || {};
+      return (
+        <div style={{
+          position: 'relative', zIndex: 4,
+          padding: '54px 22px 0',
+        }}>
+          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: P.amberWarm, opacity: 0.85, marginBottom: 6 }}>
+            {cfg.eyebrow}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
+            <div>
+              <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 28, color: P.cream, lineHeight: 1.0 }}>
+                {cfg.line1}
+              </div>
+              <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 28, color: P.cream, lineHeight: 1.05, fontStyle: 'italic' }}>
+                {cfg.line2}
+              </div>
+            </div>
+            {tab === 'garden' && (
+              <div style={{
+                padding: '7px 13px 7px 9px', borderRadius: 999,
+                background: 'rgba(14, 24, 19, 0.88)',
+                border: '1px solid rgba(212,162,94,0.35)',
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                whiteSpace: 'nowrap',
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3 C 8 9, 5 13, 5 16 a 7 7 0 0 0 14 0 c 0 -3, -3 -7, -7 -13z" fill={P.amberWarm} />
+                </svg>
+                <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: 16, color: P.cream, lineHeight: 1, letterSpacing: 0.3 }}>
+                  {tended}<span style={{ color: P.muted, margin: '0 3px' }}>/</span>{total}
+                </span>
+                <span style={{ fontSize: 9, color: P.amberWarm, letterSpacing: 1, textTransform: 'uppercase', marginLeft: 2 }}>
+                  tended
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function TweakSlider({ label, value, min, max, onChange, leftHint, rightHint, sublabel }) {
+      const pct = ((value - min) / (max - min)) * 100;
+      return (
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+            <span style={{ fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: P.amberWarm, fontWeight: 600 }}>
+              {label}
+            </span>
+            <span style={{ fontSize: 11, color: P.cream, fontFamily: '"DM Serif Display", serif', fontStyle: 'italic' }}>
+              {sublabel}
+            </span>
+          </div>
+          <div style={{ position: 'relative', height: 26, display: 'flex', alignItems: 'center' }}>
+            <div style={{
+              position: 'absolute', left: 0, right: 0, height: 4, borderRadius: 2,
+              background: 'rgba(240,232,213,0.08)',
+            }} />
+            <div style={{
+              position: 'absolute', left: 0, width: `${pct}%`, height: 4, borderRadius: 2,
+              background: `linear-gradient(90deg, ${P.leafDeep}, ${P.amberWarm})`,
+            }} />
+            <input
+              type="range" min={min} max={max} value={value}
+              onChange={(e) => onChange(Number(e.target.value))}
+              style={{
+                position: 'absolute', left: 0, right: 0, width: '100%',
+                opacity: 0, height: 26, cursor: 'pointer', margin: 0,
+              }}
+            />
+            <div style={{
+              position: 'absolute', left: `calc(${pct}% - 9px)`, width: 18, height: 18, borderRadius: '50%',
+              background: P.amberWarm, border: '2px solid #0e1d18',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.5), 0 0 12px rgba(232,184,122,0.4)',
+              pointerEvents: 'none',
+            }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+            <span style={{ fontSize: 9, color: P.muted, letterSpacing: 0.5 }}>{leftHint}</span>
+            <span style={{ fontSize: 9, color: P.muted, letterSpacing: 0.5 }}>{rightHint}</span>
+          </div>
+        </div>
+      );
+    }
+
+    function TweaksPanel({ tweaks, setTweak, onClose }) {
+      const todLabel = tweaks.timeOfDay < 25 ? 'Dawn'
+        : tweaks.timeOfDay < 50 ? 'Midday'
+          : tweaks.timeOfDay < 75 ? 'Dusk' : 'Night';
+      const moodLabel = tweaks.gardenMood < 25 ? 'Serene'
+        : tweaks.gardenMood < 50 ? 'Steady'
+          : tweaks.gardenMood < 75 ? 'Restless' : 'Anxious';
+      return (
+        <div style={{
+          position: 'absolute', right: 12, bottom: 100, zIndex: 300,
+          width: 286, padding: '16px 18px 18px',
+          background: 'rgba(20, 28, 24, 0.96)',
+          border: '1px solid rgba(232,184,122,0.25)',
+          borderRadius: 18,
+          boxShadow: '0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)',
+          color: P.cream,
+          fontFamily: '"Manrope", -apple-system, sans-serif',
+          animation: 'fadeIn 220ms ease',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div>
+              <div style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: P.amberWarm, opacity: 0.85 }}>
+                Garden controls
+              </div>
+              <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 18, color: P.cream, lineHeight: 1 }}>
+                Tweaks
+              </div>
+            </div>
+            <button onClick={onClose} style={{
+              width: 26, height: 26, borderRadius: '50%',
+              background: 'rgba(240,232,213,0.06)', border: '1px solid rgba(240,232,213,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+            }}>
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 1 L9 9 M9 1 L1 9" stroke={P.cream} strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+
+          <TweakSlider
+            label="Time of day"
+            value={tweaks.timeOfDay} min={0} max={100}
+            onChange={(v) => setTweak('timeOfDay', v)}
+            sublabel={todLabel}
+            leftHint="Dawn" rightHint="Night"
+          />
+          <TweakSlider
+            label="Garden mood"
+            value={tweaks.gardenMood} min={0} max={100}
+            onChange={(v) => setTweak('gardenMood', v)}
+            sublabel={moodLabel}
+            leftHint="Calm · cool" rightHint="Anxious · warm"
+          />
+          <TweakSlider
+            label="Plant density"
+            value={tweaks.plantDensity} min={1} max={8}
+            onChange={(v) => setTweak('plantDensity', v)}
+            sublabel={`${tweaks.plantDensity} ${tweaks.plantDensity === 1 ? 'plant' : 'plants'}`}
+            leftHint="Sparse" rightHint="Lush"
+          />
+        </div>
+      );
+    }
+
+    function hashSeed(s) {
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+      return h;
+    }
+    function genHistory(habit, days = 28) {
+      const arr = [];
+      const seed = hashSeed(habit.id);
+      for (let i = 0; i < days; i++) {
+        const remaining = days - 1 - i;
+        let kept;
+        if (habit.wilted) {
+          kept = remaining < 4 ? false : ((Math.sin(seed + i * 1.7) + 1) / 2) > 0.32;
+        } else if (remaining < habit.streak) {
+          kept = true;
+        } else {
+          const r = (Math.sin(seed + i * 0.9) + 1) / 2;
+          kept = r > 0.35;
+        }
+        arr.push(kept ? 1 : 0);
+      }
+      return arr;
+    }
+
+    const INSIGHTS = {
+      h1: {
+        hook: 'Your lotus blooms on Mondays', body: "Sunday-to-Monday is your strongest meditation arc. What's different about Mondays — and how do you carry it into Thursdays?",
+        tips: ['Anchor the sit to the kettle, every morning.', 'Leave the phone in another room until after.', 'Try a 2-minute sit on a Thursday; build from there.']
+      },
+      h2: {
+        hook: 'Reading slows mid-week', body: 'Pages stop turning around Wednesday. Block 20 minutes earlier in the day, before the inbox catches up.',
+        tips: ['Move the book to your kitchen table tonight.', 'Read at lunch on Wednesdays — 10 pages over food.', 'Pick a shorter book for the next two weeks.']
+      },
+      h3: {
+        hook: 'Hydration follows the kettle', body: 'You hit 2L when the bottle is refilled before 9am. Make it part of the morning kettle ritual — it already happens.',
+        tips: ['Fill the bottle while the kettle boils.', 'Put a second glass on your desk at noon.', "Don't track sips. Track refills."]
+      },
+      h4: {
+        hook: 'Runs miss after late nights', body: "Bedtime past 11pm and your fern droops the next morning. Don't move the alarm; move the night before.",
+        tips: ['Set a wind-down alarm for 10:15pm.', 'Lay running clothes out before bed, not after.', 'Skip the run if you slept under 6h — wake the fern gently.']
+      },
+      h5: {
+        hook: 'Journaling falters on weekends', body: 'Weekday clover grows fast; weekend pages disappear. A single Sunday-evening line might do more than seven nightly ones.',
+        tips: ['Replace Saturday journaling with a single line on Sunday.', 'Use a tiny notebook on weekends — less pressure.', "Write one question instead of an answer."]
+      },
+      h6: {
+        hook: 'Stretching clusters in pairs', body: 'You stretch two days in a row, then skip three. Try anchoring it to lunch — every day, same minute.',
+        tips: ['Stretch for 3 minutes after lunch, no more.', 'Same spot every day. Make it dull and easy.', 'Skip the long routine on busy days, not the short one.']
+      },
+      h7: {
+        hook: 'Phone-free mornings stick', body: "This is your longest, calmest streak. Whatever you're doing — leave it exactly where it is.",
+        tips: ['Keep the phone in the kitchen, not the bedroom.', "Don't make this a rule — make it a habit. Stop counting.", 'Notice what fills the time. Defend that thing.']
+      },
+      h8: {
+        hook: 'Steps spike after meetings', body: 'Most of your 5k days have a 2pm meeting block. The walk after release is your secret. Schedule it on quieter days too.',
+        tips: ['Block a 10-minute walk at 2pm even on quiet days.', 'Pair walks with one phone call you owe.', 'Park further from one destination this week.']
+      },
+    };
+
+    function GrowthLine({ history, species }) {
+      const W = 320, H = 56;
+      const days = history.length;
+      const stepX = W / (days - 1);
+      let rolling = 0.15;
+      const values = history.map((h) => {
+        if (h) rolling = Math.min(rolling + 0.12, 1);
+        else rolling = Math.max(rolling - 0.18, 0.08);
+        return rolling;
+      });
+      const baseline = H / 2 + 2;
+      const top = values.map((v, i) => [i * stepX, baseline - v * 20]);
+      const bot = values.map((v, i) => [i * stepX, baseline + v * 8]);
+      const path = [
+        `M ${top[0][0].toFixed(1)} ${top[0][1].toFixed(1)}`,
+        ...top.slice(1).map(([x, y]) => `L ${x.toFixed(1)} ${y.toFixed(1)}`),
+        ...[...bot].reverse().map(([x, y]) => `L ${x.toFixed(1)} ${y.toFixed(1)}`),
+        'Z',
+      ].join(' ');
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} preserveAspectRatio="none"
+          style={{ display: 'block' }}>
+          <defs>
+            <linearGradient id={`gl-${species}`} x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stopColor="#3d6647" stopOpacity="0.4" />
+              <stop offset="60%" stopColor="#7eb586" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#a8d39e" stopOpacity="1" />
+            </linearGradient>
+          </defs>
+          <path d={path} fill={`url(#gl-${species})`} />
+          {history.map((h, i) => (
+            <circle key={i} cx={i * stepX} cy={baseline}
+              r={h ? 1.8 : 1}
+              fill={h ? '#f0e8d5' : '#5e5230'}
+              opacity={h ? 0.7 : 0.5} />
+          ))}
+          <line x1="0" x2={W} y1={H - 4} y2={H - 4} stroke="#2a1f15" strokeWidth="1" opacity="0.6" />
+        </svg>
+      );
+    }
+
+    function streakStats(hist) {
+      let best = 0, cur = 0, gap = 0, longestGap = 0;
+      hist.forEach((h) => {
+        if (h) { cur++; gap = 0; best = Math.max(best, cur); }
+        else { gap++; cur = 0; longestGap = Math.max(longestGap, gap); }
+      });
+      return { best, longestGap };
+    }
+
+    function AlmanacCard({ h, onOpen }) {
+      const [expanded, setExpanded] = useState(false);
+      const [note, setNote] = useState('');
+      const hist = useMemo(() => genHistory(h), [h.id]);
+      const kept = hist.filter(Boolean).length;
+      const lastWeek = hist.slice(-7).filter(Boolean).length;
+      const { best, longestGap } = streakStats(hist);
+      const weeks = [0, 1, 2, 3].map((w) => hist.slice(w * 7, (w + 1) * 7));
+      const weekLabels = ['4 weeks ago', '3 weeks ago', '2 weeks ago', 'this week'];
+
+      return (
+        <div style={{
+          background: expanded ? 'rgba(14,24,19,0.78)' : 'rgba(14,24,19,0.55)',
+          border: `1px solid ${expanded ? 'rgba(232,184,122,0.25)' : 'rgba(240,232,213,0.07)'}`,
+          borderRadius: 18, marginBottom: 12,
+          boxShadow: expanded ? '0 10px 30px rgba(0,0,0,0.35)' : 'none',
+          overflow: 'hidden',
+          transition: 'background 280ms ease, border-color 280ms ease, box-shadow 280ms ease',
+        }}>
+          <button onClick={() => setExpanded((v) => !v)}
+            style={{
+              width: '100%', textAlign: 'left',
+              background: 'transparent', border: 'none',
+              padding: '14px 16px 12px', cursor: 'pointer',
+            }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
+              <div style={{ width: 62, height: 70, display: 'flex', alignItems: 'flex-end' }}>
+                <Plant species={h.species} stage={h.stage} wilted={h.wilted} size={58} />
+              </div>
+              <div style={{ flex: 1, paddingBottom: 4 }}>
+                <div style={{ fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: P.amberWarm, opacity: 0.8 }}>
+                  {SPECIES_LABEL[h.species]}
+                </div>
+                <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 18, color: P.cream, lineHeight: 1.15, marginTop: 2 }}>
+                  {h.name}
+                </div>
+                <div style={{ fontSize: 11, color: P.creamMuted, marginTop: 4 }}>
+                  {kept} / {hist.length} days · {lastWeek}/7 this week
+                </div>
+              </div>
+              <div style={{ textAlign: 'right', paddingBottom: 4, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div>
+                  <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 22, color: P.cream, lineHeight: 1 }}>
+                    {h.streak}<span style={{ fontSize: 11, color: P.muted, marginLeft: 2 }}>d</span>
+                  </div>
+                  <div style={{ fontSize: 9, color: P.amberWarm, letterSpacing: 1, textTransform: 'uppercase' }}>streak</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 14 14"
+                  style={{
+                    transform: expanded ? 'rotate(180deg)' : 'rotate(0)',
+                    transition: 'transform 280ms ease',
+                    opacity: 0.7,
+                  }}>
+                  <path d="M3 5 L 7 9 L 11 5" stroke={P.amberWarm} strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <GrowthLine history={hist} species={h.species} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+              <span style={{ fontSize: 9, color: P.muted, letterSpacing: 0.6 }}>28 days ago</span>
+              <span style={{ fontSize: 9, color: P.muted, letterSpacing: 0.6 }}>today</span>
+            </div>
+          </button>
+
+          <div style={{
+            maxHeight: expanded ? 540 : 0,
+            opacity: expanded ? 1 : 0,
+            transform: expanded ? 'translateY(0)' : 'translateY(-6px)',
+            overflow: 'hidden',
+            transition: expanded
+              ? 'max-height 480ms cubic-bezier(.16,1,.3,1), opacity 280ms ease 100ms, transform 320ms ease 80ms'
+              : 'max-height 320ms ease, opacity 180ms ease, transform 180ms ease',
+          }}>
+            <div style={{ padding: '6px 16px 16px' }}>
+              <div style={{
+                height: 1, marginBottom: 14,
+                backgroundImage: 'repeating-linear-gradient(90deg, rgba(232,184,122,0.35) 0 4px, transparent 4px 9px)',
+              }} />
+
+              <div style={{
+                borderRadius: 14, padding: '14px 14px 10px',
+                background: 'rgba(168,211,158,0.04)',
+                border: '1px solid rgba(168,211,158,0.10)',
+              }}>
+                <div style={{ fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: P.amberWarm, marginBottom: 8 }}>
+                  Growth wave · 28 days
+                </div>
+                <div style={{ height: 90 }}>
+                  <svg viewBox="0 0 320 90" width="100%" height="90" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id={`gle-${h.id}`} x1="0" x2="1" y1="0" y2="0">
+                        <stop offset="0%" stopColor="#3d6647" stopOpacity="0.5" />
+                        <stop offset="60%" stopColor="#7eb586" stopOpacity="0.9" />
+                        <stop offset="100%" stopColor="#a8d39e" stopOpacity="1" />
+                      </linearGradient>
+                    </defs>
+                    {(() => {
+                      const W = 320, H = 90;
+                      const stepX = W / (hist.length - 1);
+                      let rolling = 0.15;
+                      const vals = hist.map((d) => {
+                        if (d) rolling = Math.min(rolling + 0.12, 1);
+                        else rolling = Math.max(rolling - 0.18, 0.08);
+                        return rolling;
+                      });
+                      const baseline = H / 2 + 8;
+                      const top = vals.map((v, i) => [i * stepX, baseline - v * 36]);
+                      const bot = vals.map((v, i) => [i * stepX, baseline + v * 14]);
+                      const path = [
+                        `M ${top[0][0].toFixed(1)} ${top[0][1].toFixed(1)}`,
+                        ...top.slice(1).map(([x, y]) => `L ${x.toFixed(1)} ${y.toFixed(1)}`),
+                        ...[...bot].reverse().map(([x, y]) => `L ${x.toFixed(1)} ${y.toFixed(1)}`),
+                        'Z',
+                      ].join(' ');
+                      return (
+                        <g>
+                          <path d={path} fill={`url(#gle-${h.id})`} />
+                          {hist.map((d, i) => (
+                            <circle key={i} cx={i * stepX} cy={baseline}
+                              r={d ? 2.2 : 1.4}
+                              fill={d ? '#f0e8d5' : '#5e5230'}
+                              opacity={d ? 0.8 : 0.6} />
+                          ))}
+                          <line x1="0" x2={W} y1={H - 4} y2={H - 4} stroke="#2a1f15" strokeWidth="1" opacity="0.5" />
+                        </g>
+                      );
+                    })()}
+                  </svg>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12 }}>
+                <MiniStat label="Best run" value={`${best}d`} hint={best >= 14 ? 'a long bloom' : best >= 7 ? 'a steady stretch' : 'just getting started'} />
+                <MiniStat label="Longest gap" value={`${longestGap}d`} hint={longestGap === 0 ? 'unbroken' : longestGap <= 2 ? 'a small dry spell' : 'a thirsty week'} />
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: P.muted, marginBottom: 8 }}>
+                  By week
+                </div>
+                {weeks.map((wk, i) => {
+                  const wkKept = wk.filter(Boolean).length;
+                  return (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                      <div style={{ fontSize: 10, color: P.creamMuted, width: 80 }}>{weekLabels[i]}</div>
+                      <div style={{ display: 'flex', gap: 4, flex: 1 }}>
+                        {wk.map((d, j) => (
+                          <div key={j} style={{
+                            flex: 1, height: 12, borderRadius: 3,
+                            background: d ? `linear-gradient(180deg, ${P.leafBright}, ${P.leaf})` : 'rgba(240,232,213,0.06)',
+                            boxShadow: d ? '0 0 4px rgba(168,211,158,0.3)' : 'none',
+                          }} />
+                        ))}
+                      </div>
+                      <div style={{ fontSize: 10, color: wkKept >= 5 ? P.leafBright : P.muted, fontFamily: '"DM Serif Display", serif', width: 24, textAlign: 'right' }}>
+                        {wkKept}<span style={{ fontSize: 8, color: P.muted }}>/7</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: P.muted, marginBottom: 6 }}>
+                  A note for the gardener
+                </div>
+                <textarea
+                  value={note} onChange={(e) => setNote(e.target.value)}
+                  placeholder="Write a line about how this is going…"
+                  rows={2}
+                  style={{
+                    width: '100%', boxSizing: 'border-box', resize: 'none',
+                    background: 'rgba(240,232,213,0.04)',
+                    border: '1px solid rgba(240,232,213,0.10)',
+                    borderRadius: 10, padding: '10px 12px',
+                    fontSize: 13, color: P.cream, fontFamily: '"DM Serif Display", serif',
+                    fontStyle: 'italic', lineHeight: 1.4, outline: 'none',
+                  }} />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+                <button onClick={() => onOpen(h.id)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontSize: 11, color: P.amberWarm, letterSpacing: 1, textTransform: 'uppercase',
+                    padding: 0,
+                  }}>
+                  Open plant →
+                </button>
+                <button onClick={() => setExpanded(false)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontSize: 11, color: P.muted, letterSpacing: 1, textTransform: 'uppercase',
+                    padding: 0,
+                  }}>
+                  Fold up
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function MiniStat({ label, value, hint }) {
+      return (
+        <div style={{
+          padding: '10px 12px', borderRadius: 12,
+          background: 'rgba(240,232,213,0.04)',
+          border: '1px solid rgba(240,232,213,0.07)',
+        }}>
+          <div style={{ fontSize: 9, letterSpacing: 1.3, textTransform: 'uppercase', color: P.muted, marginBottom: 4 }}>
+            {label}
+          </div>
+          <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 20, color: P.cream, lineHeight: 1 }}>
+            {value}
+          </div>
+          {hint && <div style={{ fontSize: 10, color: P.amberWarm, marginTop: 4, fontStyle: 'italic' }}>{hint}</div>}
+        </div>
+      );
+    }
+
+    function AlmanacScreen({ habits, onOpen }) {
+      return (
+        <div style={{ padding: '8px 20px 130px', overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
+          {habits.map((h) => (
+            <AlmanacCard key={h.id} h={h} onOpen={onOpen} />
+          ))}
+          <div style={{
+            textAlign: 'center', color: P.muted, fontSize: 11, fontStyle: 'italic',
+            padding: '8px 0 20px', fontFamily: '"DM Serif Display", serif'
+          }}>
+            The garden remembers.
+          </div>
+        </div>
+      );
+    }
+
+    function GrowCard({ h, index, onOpen }) {
+      const [flipped, setFlipped] = useState(false);
+      const [read, setRead] = useState(false);
+      const ins = INSIGHTS[h.id] || {
+        hook: 'Finding its rhythm',
+        body: 'Keep tending. The pattern will surface.',
+        tips: ['Keep showing up.', 'Note one small thing today.', 'Adjust nothing yet.'],
+      };
+      const plantRight = index % 2 === 0;
+      const MIN_H = 188;
+
+      const markRead = (e) => {
+        e.stopPropagation();
+        setRead(true);
+        setFlipped(false);
+      };
+
+      return (
+        <div style={{
+          perspective: 1400, marginBottom: 12,
+          opacity: read ? 0.55 : 1,
+          transition: 'opacity 500ms ease',
+        }}>
+          <div style={{
+            position: 'relative',
+            transformStyle: 'preserve-3d',
+            WebkitTransformStyle: 'preserve-3d',
+            transition: 'transform 720ms cubic-bezier(.4,.0,.2,1)',
+            transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+            minHeight: MIN_H,
+          }}>
+            <div onClick={() => setFlipped(true)}
+              style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(135deg, rgba(20,32,26,0.7), rgba(14,24,19,0.5))',
+                border: '1px solid rgba(168,211,158,0.10)',
+                borderRadius: 20, padding: '16px 18px 18px',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+              }}>
+              <div style={{
+                position: 'absolute',
+                [plantRight ? 'right' : 'left']: -14, bottom: -18,
+                opacity: 0.6,
+                filter: 'drop-shadow(0 0 24px rgba(126,181,134,0.2))',
+                pointerEvents: 'none',
+              }}>
+                <Plant species={h.species} stage={Math.max(2, h.stage)} wilted={false} size={130} />
+              </div>
+              <div style={{
+                position: 'relative', maxWidth: '70%',
+                marginLeft: plantRight ? 0 : 'auto',
+                textAlign: plantRight ? 'left' : 'right',
+              }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4,
+                  justifyContent: plantRight ? 'flex-start' : 'flex-end'
+                }}>
+                  <div style={{
+                    fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase',
+                    color: P.amberWarm, opacity: 0.85
+                  }}>
+                    {h.name}
+                  </div>
+                  {read && (
+                    <div style={{
+                      fontSize: 8, letterSpacing: 0.8, textTransform: 'uppercase', color: P.leafBright,
+                      background: 'rgba(168,211,158,0.12)', border: '1px solid rgba(168,211,158,0.25)',
+                      padding: '1px 5px', borderRadius: 4,
+                    }}>read</div>
+                  )}
+                </div>
+                <div style={{
+                  fontFamily: '"DM Serif Display", serif', fontSize: 19, color: P.cream,
+                  lineHeight: 1.2, marginBottom: 8, textWrap: 'pretty'
+                }}>
+                  {ins.hook}
+                </div>
+                <div style={{ fontSize: 12, color: P.creamMuted, lineHeight: 1.5, textWrap: 'pretty' }}>
+                  {ins.body}
+                </div>
+              </div>
+              <div style={{
+                position: 'absolute',
+                bottom: 12,
+                [plantRight ? 'right' : 'left']: 16,
+                fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase',
+                color: P.amberWarm, opacity: 0.8,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+                Three small moves
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                  <path d="M3 4 a 4 4 0 1 1 6 4" stroke={P.amberWarm} strokeWidth="1.4" fill="none" strokeLinecap="round" />
+                  <path d="M9 8 L 9 5 L 12 5" stroke={P.amberWarm} strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" transform="rotate(70 9 6.5)" />
+                </svg>
+              </div>
+            </div>
+
+            <div style={{
+              position: 'absolute', inset: 0,
+              transform: 'rotateY(180deg)',
+              background: 'linear-gradient(135deg, rgba(34,44,36,0.85), rgba(20,28,22,0.7))',
+              border: '1px solid rgba(232,184,122,0.30)',
+              borderRadius: 20, padding: '14px 18px 16px',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              display: 'flex', flexDirection: 'column',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                position: 'absolute', right: -20, bottom: -20,
+                opacity: 0.18, pointerEvents: 'none',
+              }}>
+                <Plant species={h.species} stage={4} wilted={false} size={130} />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div>
+                  <div style={{ fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: P.amberWarm, opacity: 0.85 }}>
+                    For {h.name.toLowerCase()}
+                  </div>
+                  <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 16, color: P.cream, lineHeight: 1, fontStyle: 'italic', marginTop: 2 }}>
+                    Three small moves
+                  </div>
+                </div>
+                <button onClick={(e) => { e.stopPropagation(); setFlipped(false); }}
+                  style={{
+                    width: 24, height: 24, borderRadius: '50%',
+                    background: 'rgba(240,232,213,0.06)', border: '1px solid rgba(240,232,213,0.12)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                  }}>
+                  <svg width="9" height="9" viewBox="0 0 10 10"><path d="M1 1 L9 9 M9 1 L1 9" stroke={P.cream} strokeWidth="1.5" strokeLinecap="round" /></svg>
+                </button>
+              </div>
+
+              <ol style={{ listStyle: 'none', padding: 0, margin: 0, flex: 1, position: 'relative' }}>
+                {ins.tips.map((tip, i) => (
+                  <li key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 7 }}>
+                    <span style={{
+                      flex: '0 0 auto',
+                      fontFamily: '"DM Serif Display", serif',
+                      fontSize: 14, color: P.amberWarm, lineHeight: 1.2,
+                      width: 16, textAlign: 'center', marginTop: 0,
+                    }}>{i + 1}</span>
+                    <span style={{ fontSize: 12, color: P.cream, lineHeight: 1.4, textWrap: 'pretty' }}>
+                      {tip}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+
+              <div style={{ display: 'flex', gap: 8, marginTop: 4, position: 'relative' }}>
+                <button onClick={(e) => { e.stopPropagation(); onOpen(h.id); }}
+                  style={{
+                    flex: 1, height: 36, borderRadius: 18,
+                    background: 'rgba(240,232,213,0.05)',
+                    border: '1px solid rgba(240,232,213,0.12)',
+                    color: P.cream, fontSize: 11, fontWeight: 600, letterSpacing: 0.8,
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                  }}>
+                  Open plant
+                </button>
+                <button onClick={markRead}
+                  style={{
+                    flex: 1, height: 36, borderRadius: 18,
+                    background: `linear-gradient(135deg, ${P.amberWarm}, ${P.amber})`,
+                    border: 'none',
+                    color: '#0e1d18', fontSize: 11, fontWeight: 700, letterSpacing: 0.8,
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(212,162,94,0.3)',
+                  }}>
+                  Got it
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function GrowScreen({ habits, onOpen }) {
+      return (
+        <div style={{ padding: '8px 20px 130px', overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
+          <div style={{
+            fontSize: 11, letterSpacing: 1.6, textTransform: 'uppercase', color: P.amberWarm,
+            marginBottom: 12, opacity: 0.85, paddingLeft: 2
+          }}>
+            What the garden noticed
+          </div>
+          {habits.map((h, idx) => (
+            <GrowCard key={h.id} h={h} index={idx} onOpen={onOpen} />
+          ))}
+        </div>
+      );
+    }
+
+    function MeScreen({ habits }) {
+      const gardenAge = 84;
+      const longest = Math.max(...habits.map((h) => h.streak));
+      const longestHabit = habits.find((h) => h.streak === longest);
+      const tendedToday = habits.filter((h) => h.doneToday).length;
+      const lifetimeTends = habits.reduce((sum, h) => sum + h.streak * (h.wilted ? 0.7 : 1.4), 0) | 0;
+      const speciesCount = new Set(habits.map((h) => h.species)).size;
+
+      return (
+        <div style={{ padding: '4px 22px 130px', overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: '50%',
+              background: `linear-gradient(135deg, ${P.leafDeep}, ${P.leaf})`,
+              border: '2px solid rgba(232,184,122,0.4)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: '"DM Serif Display", serif', fontSize: 26, color: '#0e1d18',
+              boxShadow: '0 4px 20px rgba(126,181,134,0.3)',
+            }}>M</div>
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: P.amberWarm, opacity: 0.85 }}>
+                The gardener
+              </div>
+              <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 26, color: P.cream, lineHeight: 1.05 }}>
+                Maya
+              </div>
+              <div style={{ fontSize: 12, color: P.creamMuted, marginTop: 2 }}>
+                Planted Feb 28 · {gardenAge} days ago
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+            <MeTile big label="Longest streak" value={`${longest}d`} sub={longestHabit?.name || ''} />
+            <MeTile big label="Garden age" value={`${gardenAge}d`} sub="since first seed" />
+            <MeTile label="Plants tended (life)" value={lifetimeTends} />
+            <MeTile label="Species in garden" value={speciesCount} />
+            <MeTile label="Tended today" value={`${tendedToday} / ${habits.length}`} />
+            <MeTile label="Currently wilted" value={habits.filter((h) => h.wilted).length} />
+          </div>
+
+          <div style={{
+            padding: '18px 18px 20px', borderRadius: 18,
+            background: 'linear-gradient(180deg, rgba(212,162,94,0.10), rgba(14,24,19,0.4))',
+            border: '1px solid rgba(212,162,94,0.20)',
+            marginBottom: 16,
+          }}>
+            <div style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: P.amberWarm, marginBottom: 8 }}>
+              Garden report · this week
+            </div>
+            <div style={{
+              fontFamily: '"DM Serif Display", serif', fontSize: 18, color: P.cream,
+              lineHeight: 1.35, fontStyle: 'italic', textWrap: 'pretty'
+            }}>
+              Your garden is in late spring. The lotus is heaviest with bloom, the fern is thirsty, and a small clover is just lifting its head. Tend the dry ones first.
+            </div>
+          </div>
+
+          <div style={{
+            textAlign: 'center', color: P.muted, fontSize: 11, fontStyle: 'italic',
+            padding: '8px 0 0', fontFamily: '"DM Serif Display", serif'
+          }}>
+            A garden is what you return to.
+          </div>
+        </div>
+      );
+    }
+
+    function MeTile({ label, value, sub, big }) {
+      return (
+        <div style={{
+          padding: big ? '14px 14px' : '12px 14px',
+          borderRadius: 14,
+          background: 'rgba(14,24,19,0.55)',
+          border: '1px solid rgba(240,232,213,0.07)',
+          gridColumn: big ? 'span 1' : undefined,
+        }}>
+          <div style={{ fontSize: 9, letterSpacing: 1.4, textTransform: 'uppercase', color: P.muted, marginBottom: 4 }}>
+            {label}
+          </div>
+          <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: big ? 26 : 20, color: P.cream, lineHeight: 1.05 }}>
+            {value}
+          </div>
+          {sub && <div style={{ fontSize: 10, color: P.amberWarm, marginTop: 2, letterSpacing: 0.3 }}>{sub}</div>}
+        </div>
+      );
+    }
+
+    function HabitGarden() {
+      const [habits, setHabits] = useState(INITIAL_HABITS);
+      const [selectedId, setSelectedId] = useState(null);
+      const [showAdd, setShowAdd] = useState(false);
+      const [tab, setTab] = useState('garden');
+      const [wateringId, setWateringId] = useState(null);
+      const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+      const [editMode, setEditMode] = useState(false);
+
+      useEffect(() => {
+        const onMsg = (e) => {
+          const d = e.data || {};
+          if (d.type === '__activate_edit_mode') setEditMode(true);
+          else if (d.type === '__deactivate_edit_mode') setEditMode(false);
+        };
+        window.addEventListener('message', onMsg);
+        try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch (_) { }
+        return () => window.removeEventListener('message', onMsg);
+      }, []);
+
+      const setTweak = (k, v) => {
+        setTweaks((t) => {
+          const next = { ...t, [k]: v };
+          try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*'); } catch (_) { }
+          return next;
+        });
+      };
+      const closePanel = () => {
+        setEditMode(false);
+        try { window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*'); } catch (_) { }
+      };
+
+      const selected = habits.find((h) => h.id === selectedId);
+
+      const water = () => {
+        if (!selected) return;
+        setWateringId(selected.id);
+        setTimeout(() => setWateringId(null), 1100);
+        setHabits((hs) => hs.map((h) =>
+          h.id === selected.id
+            ? { ...h, stage: Math.min(4, h.stage + 1), streak: h.streak + 1, doneToday: true, wilted: false }
+            : h));
+      };
+      const revive = () => {
+        if (!selected) return;
+        setWateringId(selected.id);
+        setTimeout(() => setWateringId(null), 1100);
+        setHabits((hs) => hs.map((h) =>
+          h.id === selected.id
+            ? { ...h, wilted: false, stage: 1, streak: 1, doneToday: true }
+            : h));
+      };
+      const addHabit = ({ name, species, cadence }) => {
+        const id = 'h' + Date.now();
+        setHabits((hs) => [...hs, {
+          id, name, species, cadence, stage: 0, streak: 0,
+          wilted: false, doneToday: false, note: 'Freshly planted. Water tomorrow.',
+        }]);
+        setShowAdd(false);
+        setSelectedId(id);
+      };
+
+      const visibleHabits = habits.slice(0, tweaks.plantDensity);
+      const slots = useMemo(() => genSlots(tweaks.plantDensity), [tweaks.plantDensity]);
+      const mood = moodOverlay(tweaks.gardenMood);
+      const tod = todPalette(tweaks.timeOfDay);
+
+      const openHabit = (id) => setSelectedId(id);
+
+      return (
+        <div style={{
+          position: 'relative', width: '100%', height: '100%',
+          fontFamily: '"Manrope", -apple-system, system-ui, sans-serif',
+          overflow: 'hidden', color: P.cream,
+          filter: `saturate(${mood.saturate})`,
+        }}>
+          <SceneBackground tweaks={tweaks} />
+          <TopBar habits={visibleHabits} tab={tab} />
+
+          <div key={tab} style={{
+            position: 'absolute', left: 0, right: 0, bottom: 0, top: 130,
+            animation: 'tabIn 380ms cubic-bezier(.2,.8,.2,1)',
+          }}>
+            {tab === 'garden' && (
+              <React.Fragment>
+                <GardenBed />
+                {visibleHabits.map((h, i) => {
+                  const slot = slots[i];
+                  if (!slot) return null;
+                  return (
+                    <div key={h.id} style={{ position: 'absolute', left: slot.l, bottom: slot.b, zIndex: slot.z }}>
+                      <GardenPlant
+                        habit={h}
+                        size={slot.s}
+                        onTap={() => setSelectedId(h.id)}
+                        watering={wateringId === h.id}
+                      />
+                    </div>
+                  );
+                })}
+                <div style={{
+                  position: 'absolute', left: 0, right: 0, bottom: 400, zIndex: 5,
+                  textAlign: 'center', pointerEvents: 'none',
+                }}>
+                  <div style={{ fontSize: 12, color: P.amberWarm, letterSpacing: 2.5, textTransform: 'uppercase', opacity: 0.75 }}>
+                    {visibleHabits.some(h => h.wilted) ? '1 plant needs water' : 'Garden is at peace'}
+                  </div>
+                  <div style={{ fontFamily: '"DM Serif Display", serif', fontStyle: 'italic', fontSize: 17, color: P.creamMuted, marginTop: 6, opacity: 0.9 }}>
+                    Tend slowly. Tend often.
+                  </div>
+                </div>
+              </React.Fragment>
+            )}
+            {tab === 'almanac' && (
+              <React.Fragment>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,18,15,0.0) 0%, rgba(10,18,15,0.5) 30%, rgba(10,18,15,0.75) 100%)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', inset: 0 }}>
+                  <AlmanacScreen habits={habits} onOpen={openHabit} />
+                </div>
+              </React.Fragment>
+            )}
+            {tab === 'grow' && (
+              <React.Fragment>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,18,15,0.0) 0%, rgba(10,18,15,0.5) 30%, rgba(10,18,15,0.75) 100%)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', inset: 0 }}>
+                  <GrowScreen habits={habits} onOpen={openHabit} />
+                </div>
+              </React.Fragment>
+            )}
+            {tab === 'me' && (
+              <React.Fragment>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,18,15,0.0) 0%, rgba(10,18,15,0.4) 25%, rgba(10,18,15,0.7) 100%)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', inset: 0 }}>
+                  <MeScreen habits={habits} />
+                </div>
+              </React.Fragment>
+            )}
+          </div>
+
+          <BottomNav active={tab} onTab={setTab} onAdd={() => setShowAdd(true)} />
+
+          {tab === 'garden' && (
+            <button
+              onClick={() => setEditMode((v) => !v)}
+              aria-label="Toggle tweaks panel"
+              style={{
+                position: 'absolute', top: 142, right: 22, zIndex: 250,
+                width: 38, height: 38, borderRadius: '50%',
+                background: editMode
+                  ? `linear-gradient(135deg, ${P.amberWarm}, ${P.amber})`
+                  : 'rgba(14, 24, 19, 0.88)',
+                border: `1px solid ${editMode ? 'rgba(232,184,122,0.8)' : 'rgba(212,162,94,0.35)'}`,
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: editMode
+                  ? '0 4px 16px rgba(232,184,122,0.45), 0 0 0 4px rgba(232,184,122,0.12)'
+                  : '0 4px 14px rgba(0,0,0,0.45)',
+                transition: 'all 200ms ease',
+                padding: 0,
+              }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3 a 9 9 0 1 0 0 18 c 1.4 0 2.4 -0.9 2.4 -2.2 c 0 -0.6 -0.2 -1 -0.2 -1.5 c 0 -0.9 0.7 -1.4 1.6 -1.4 H 17.5 a 3.2 3.2 0 0 0 3.2 -3.2 C 20.7 7.2 16.8 3 12 3z"
+                  stroke={editMode ? '#0e1d18' : P.cream} strokeWidth="1.5" strokeLinejoin="round" fill="none" />
+                <circle cx="7.6" cy="10.2" r="1.2" fill={editMode ? '#0e1d18' : '#e8b87a'} />
+                <circle cx="11" cy="7.2" r="1.2" fill={editMode ? '#0e1d18' : '#a8d39e'} />
+                <circle cx="15" cy="9.6" r="1.2" fill={editMode ? '#0e1d18' : '#7fb6d4'} />
+              </svg>
+            </button>
+          )}
+
+          {selected && (
+            <DetailSheet habit={selected} onClose={() => setSelectedId(null)} onWater={water} onRevive={revive} />
+          )}
+          {showAdd && (
+            <AddSheet onClose={() => setShowAdd(false)} onAdd={addHabit} />
+          )}
+          {editMode && tab === 'garden' && (
+            <TweaksPanel tweaks={tweaks} setTweak={setTweak} onClose={closePanel} />
+          )}
+        </div>
+      );
+    }
+
+    function Shell() {
+      const calcScale = () => Math.min(
+        (window.innerWidth - 40) / 402,
+        (window.innerHeight - 60) / 874,
+        1
+      );
+      const [scale, setScale] = useState(calcScale);
+      useEffect(() => {
+        const onResize = () => setScale(calcScale());
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+      }, []);
+      return (
+        <div style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+          <IOSDevice width={402} height={874}>
+            <HabitGarden />
+          </IOSDevice>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Shell />);
+  </script>
+</body>
+
+</html>
