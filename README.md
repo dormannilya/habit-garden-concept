@@ -6,8 +6,14 @@ A habit tracker reimagined as a living digital garden. Each habit is a plant: te
 
 ---
 
-![Habit Garden Demo](./docs/demo.gif)
-<!-- GIF will be added once the demo recording is complete -->
+<table>
+  <tr>
+    <td><img src="./docs/demo/1.png" width="180"/></td>
+    <td><img src="./docs/demo/2.png" width="180"/></td>
+    <td><img src="./docs/demo/3.png" width="180"/></td>
+    <td><img src="./docs/demo/4.png" width="180"/></td>
+  </tr>
+</table>
 
 ---
 
