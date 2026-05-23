@@ -67,6 +67,7 @@ This is an **early-stage UI/UX concept** created to test the core interaction mo
 - [ ] Mobile-native version
 
 Interested in where this is going? **[Join the early access list →]()**
+
 We are testing user interest **[Support the project on Product Hunt →]()**
 
 ---
