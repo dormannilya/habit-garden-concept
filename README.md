@@ -60,7 +60,7 @@ A minimal landing page used for the Product Hunt launch and early interest colle
 
 ## Try It
 
-**[Live Demo](https://dormannilya.github.io/habit-garden-concept/demo/)** | **[Landing Page](https://dormannilya.github.io/habit-garden-concept/)** | **[Product Hunt Page]()** | **[Join the waitlist](https://forms.gle/eg2B8UfdrnsjPoYN9)**
+**[Live Demo](https://dormannilya.github.io/habit-garden-concept/demo/)** | **[Landing Page](https://dormannilya.github.io/habit-garden-concept/)** | **[Product Hunt Page](https://www.producthunt.com/products/habit-garden-grow-better-habits)** | **[Join the waitlist](https://forms.gle/eg2B8UfdrnsjPoYN9)**
 
 ---
 
@@ -76,7 +76,7 @@ This is an **early-stage UI/UX concept** created to test the core interaction mo
 
 Interested in where this is going? **[Join the early access list →](https://forms.gle/eg2B8UfdrnsjPoYN9)**
 
-We are testing user interest **[Support the project on Product Hunt →]()**
+We are testing user interest **[Support the project on Product Hunt →](https://www.producthunt.com/products/habit-garden-grow-better-habits)**
 
 ---
 
