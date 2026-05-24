@@ -70,7 +70,7 @@ This is an **early-stage UI/UX concept** created to test the core interaction mo
 
 - [x] Core concept & visual design
 - [x] Interactive demo (plant states, habit interactions)
-- [ ] Product Hunt launch
+- [x] Product Hunt launch
 - [ ] Backend & data persistence
 - [ ] Mobile-native version
 
